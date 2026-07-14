@@ -1,0 +1,2556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Blueprint Code™ | Kingdom Blueprint Legacy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Supabase JS client — used for authentication, database reads, and calling secure Edge Functions -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --royal:#183A8F; --purple:#6B3FA0; --sage:#9CAF88; --ivory:#FFF9EE; --gold:#C8A44D;
+    --lavender:#EEE8F7; --mist:#EAF1FA; --cream:#FCF7ED; --navy-text:#17233D; --charcoal:#394357;
+    --ink:#232323; --line: rgba(24,58,143,0.16); --font-scale: 1;
+  }
+  *{box-sizing:border-box;}
+  html{ font-size: calc(16px * var(--font-scale)); }
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, var(--line) 0px, var(--line) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(90deg, var(--line) 0px, var(--line) 1px, transparent 1px, transparent 40px),
+      var(--ivory);
+    color: var(--ink); font-family: 'Inter', sans-serif; min-height: 100vh; line-height: 1.55;
+  }
+  h1,h2,h3,.display{ font-family:'Fraunces', serif; font-weight:600; letter-spacing:-0.01em; }
+  .wrap{ max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+  :focus-visible{ outline: 3px solid var(--gold); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
+
+  header.brand{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 6px 4px 28px; border-bottom: 1px solid var(--line); margin-bottom: 30px; flex-wrap: wrap; }
+  .brand-mark{ display:flex; align-items:center; gap:12px; }
+  .brand-glyph{ width:40px;height:40px;flex:0 0 auto; }
+  .brand-name{ font-family:'Fraunces', serif; font-weight:700; font-size: 1.05rem; color: var(--royal); line-height:1.15; }
+  .brand-name span{ display:block; font-family:'Inter', sans-serif; font-weight:500; font-size:0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple); margin-top:2px; }
+  .badge{ font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color: var(--gold); border: 1px solid var(--gold); padding: 5px 12px; border-radius: 999px; font-weight:600; white-space:nowrap; }
+  .header-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .text-size-toggle{ display:flex; gap:4px; }
+  .text-size-toggle button{ width:30px; height:30px; border-radius:8px; border:1.5px solid var(--royal); background:transparent; color:var(--royal); font-weight:700; cursor:pointer; }
+
+  .screen{ display:none; animation: fadeIn .4s ease; }
+  .screen.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .hero-eyebrow{ color: var(--purple); font-weight:600; letter-spacing:0.14em; text-transform:uppercase; font-size:0.72rem; margin-bottom: 14px; }
+  h1.hero-title{ font-size: clamp(2rem, 5vw, 2.9rem); color: var(--royal); margin: 0 0 18px; }
+  .hero-tagline{ font-size: 1.15rem; color: var(--purple); font-style: italic; font-family:'Fraunces', serif; margin: 0 0 26px; }
+  .lede{ font-size:1.02rem; color:#3a3a3a; max-width: 62ch; margin: 0 0 22px; }
+  .safety-note{ font-size:0.86rem; color:#4a4a4a; background: rgba(24,58,143,0.06); border-left: 3px solid var(--royal); padding: 12px 16px; border-radius: 8px; max-width: 62ch; margin: 0 0 26px; }
+  .blueprint-frame{ border: 1.5px dashed var(--royal); border-radius: 14px; padding: 22px 24px; background: rgba(255,255,255,0.55); margin-bottom: 26px; }
+  .blueprint-frame h3{ margin:0 0 10px; color: var(--royal); font-size:1.05rem; }
+  .blueprint-frame ul{ margin:0; padding-left: 20px; color:#3a3a3a; }
+  .blueprint-frame li{ margin-bottom:6px; }
+
+  .field-group{ margin-bottom: 22px; }
+  .field-group label{ display:block; font-size:0.82rem; font-weight:600; color: var(--royal); margin-bottom:8px; letter-spacing:0.02em; }
+  .field-group input[type="text"], .field-group input[type="email"]{
+    width:100%; max-width: 340px; font-family:'Inter', sans-serif; font-size:1rem; padding: 12px 14px;
+    border-radius: 10px; border: 1.5px solid var(--line); background: rgba(255,255,255,0.75); color: var(--ink);
+  }
+  .field-group input:focus{ outline: 2px solid var(--gold); border-color: var(--royal); }
+  .consent-row{ display:flex; gap:10px; align-items:flex-start; margin-bottom:14px; max-width:56ch; }
+  .consent-row input[type="checkbox"]{ width:20px; height:20px; margin-top:2px; flex:0 0 auto; }
+  .consent-row label{ font-size:0.88rem; color:#3a3a3a; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; cursor:pointer; font-family:'Inter', sans-serif; font-weight:600; font-size: 0.96rem; padding: 14px 26px; border-radius: 10px; transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease; text-decoration:none; }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--royal); color: var(--ivory); box-shadow: 0 6px 18px rgba(24,58,143,0.28); }
+  .btn-primary:hover{ box-shadow: 0 8px 22px rgba(24,58,143,0.36); }
+  .btn-gold{ background: var(--gold); color: #2b2109; box-shadow: 0 6px 18px rgba(200,164,77,0.35); }
+  .btn-gold:hover{ box-shadow: 0 8px 22px rgba(200,164,77,0.45); }
+  .btn-outline{ background: transparent; color: var(--royal); border: 1.5px solid var(--royal); }
+  .btn-outline:hover{ background: rgba(24,58,143,0.06); }
+  .btn-purple{ background: var(--purple); color: var(--ivory); box-shadow: 0 6px 18px rgba(107,63,160,0.3); }
+  .btn-purple:hover{ box-shadow: 0 8px 22px rgba(107,63,160,0.4); }
+  .btn-sage{ background: var(--sage); color:#1c2b17; box-shadow: 0 6px 18px rgba(156,175,136,0.35); }
+  .btn-sage:hover{ box-shadow: 0 8px 22px rgba(156,175,136,0.45); }
+  .btn-small{ padding: 8px 16px; font-size:0.82rem; border-radius:8px; }
+  .btn-row{ display:flex; gap:14px; flex-wrap:wrap; margin-top: 8px; }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; box-shadow:none; }
+
+  .resume-banner{ display:flex; align-items:center; justify-content:space-between; gap:14px; background: rgba(107,63,160,0.08); border: 1px solid rgba(107,63,160,0.3); border-radius: 12px; padding: 14px 18px; margin-bottom: 26px; flex-wrap:wrap; }
+  .resume-banner p{ margin:0; color: var(--purple); font-weight:600; font-size:0.92rem; }
+
+  .progress-track{ position: relative; height: 10px; background: rgba(24,58,143,0.1); border-radius: 999px; margin-bottom: 10px; overflow:hidden; }
+  .progress-fill{ height:100%; background: linear-gradient(90deg, var(--sage), var(--royal)); border-radius: 999px; transition: width .35s ease; }
+  .progress-label{ display:flex; justify-content:space-between; font-size:0.78rem; color: var(--purple); font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom: 30px; }
+  .q-category{ display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color: var(--gold); background: rgba(200,164,77,0.14); padding: 5px 12px; border-radius: 999px; margin-bottom: 16px; }
+  .q-text{ font-size: 1.3rem; color: var(--royal); margin: 0 0 22px; line-height:1.35; }
+
+  .scale-wrap{ margin-bottom: 30px; }
+  .scale-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .scale-btn{ flex: 1 1 0; min-width: 84px; text-align:center; border: 1.5px solid var(--line); background: rgba(255,255,255,0.7); border-radius: 12px; padding: 16px 8px; cursor:pointer; font-family:'Inter', sans-serif; transition: border-color .15s ease, background .15s ease, transform .1s ease; }
+  .scale-btn .num{ display:block; font-family:'Fraunces', serif; font-size:1.3rem; color: var(--royal); font-weight:600; }
+  .scale-btn .lbl{ display:block; font-size:0.68rem; color:#555; margin-top:4px; line-height:1.2; }
+  .scale-btn:hover{ border-color: var(--royal); background: rgba(24,58,143,0.05); }
+  .scale-btn.selected{ border-color: var(--royal); background: rgba(24,58,143,0.12); transform: translateY(-2px); }
+  .scale-ends{ display:flex; justify-content:space-between; font-size:0.72rem; color:#888; margin-top:8px; }
+
+  .reflect-wrap textarea{ width:100%; min-height: 140px; font-family:'Inter', sans-serif; font-size:1rem; padding: 14px 16px; border-radius: 12px; border: 1.5px solid var(--line); background: rgba(255,255,255,0.75); color: var(--ink); resize: vertical; margin-bottom: 30px; }
+  .reflect-wrap textarea:focus{ outline: 2px solid var(--gold); border-color: var(--royal); }
+  .reflect-note{ font-size:0.78rem; color:#888; margin: -20px 0 20px; }
+
+  .quiz-nav{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .save-note{ font-size:0.8rem; color:#777; margin-top:18px; }
+
+  .result-section{ margin-bottom: 30px; }
+  .result-eyebrow{ font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase; color: var(--purple); font-weight:700; margin-bottom:10px; }
+  .personal-greeting{ font-size:1.05rem; color: var(--royal); font-weight:600; margin-bottom: 24px; }
+
+  .season-card{ border: 2px solid var(--gold); border-radius: 16px; padding: 26px; background: linear-gradient(160deg, rgba(200,164,77,0.12), rgba(255,255,255,0.6)); text-align:center; margin-bottom: 30px; }
+  .season-name{ font-size: 1.8rem; color: var(--royal); margin: 4px 0 14px; }
+  .season-desc{ font-size:1rem; color:#3a3a3a; max-width: 58ch; margin: 0 auto 12px; }
+  .season-focus{ font-size:0.92rem; color: var(--purple); font-style:italic; max-width: 58ch; margin: 0 auto; }
+  .season-reminder{ font-size:0.8rem; color:#666; margin-top:16px; border-top: 1px dashed var(--line); padding-top:14px; }
+
+  .readiness-card{ border: 1.5px solid var(--line); border-radius: 16px; padding: 24px 26px; background: rgba(255,255,255,0.6); }
+  .readiness-pct{ font-family:'Fraunces', serif; font-size: 2.4rem; color: var(--royal); font-weight:700; margin: 0 0 6px; }
+  .readiness-meter{ height:16px; border-radius:999px; background:rgba(24,58,143,0.1); overflow:hidden; margin: 14px 0; }
+  .readiness-meter-fill{ height:100%; background: linear-gradient(90deg, var(--sage), var(--gold)); border-radius:999px; transition: width .5s ease; }
+  .readiness-interp{ font-size:0.96rem; color:#3a3a3a; }
+
+  .priority-card, .strength-card{ border: 1.5px solid var(--line); border-radius: 14px; padding: 20px 22px; background: rgba(255,255,255,0.65); margin-bottom: 14px; }
+  .priority-card h4, .strength-card h4{ margin:0 0 4px; font-size:1.05rem; color: var(--royal); }
+  .priority-card .score-tag, .strength-card .score-tag{ font-size:0.75rem; color: var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+  .priority-card p, .strength-card p{ margin: 8px 0 0; font-size:0.92rem; color:#3a3a3a; }
+  .priority-card .action-line, .strength-card .action-line{ margin-top:10px; font-weight:600; color: var(--purple); font-size:0.9rem; }
+  .strength-card{ border-left: 4px solid var(--sage); }
+  .priority-card{ border-left: 4px solid var(--purple); }
+
+  .blocker-card{ border: 2px solid var(--purple); border-radius: 16px; padding: 24px 26px; background: rgba(107,63,160,0.06); margin-bottom: 30px; }
+  .blocker-name{ color: var(--purple); font-size:1.35rem; margin:0 0 12px; }
+  .blocker-card p{ font-size:0.94rem; color:#3a3a3a; margin: 0 0 10px; }
+  .blocker-card .label{ font-weight:700; color: var(--ink); }
+
+  .plan-phase{ border: 1.5px solid var(--line); border-radius: 14px; padding: 20px 22px; background: rgba(255,255,255,0.6); margin-bottom: 16px; }
+  .plan-phase h4{ margin: 0 0 4px; color: var(--royal); font-size:1.02rem; }
+  .plan-phase .phase-range{ font-size:0.72rem; color: var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom: 12px; display:block; }
+  .plan-phase ul{ margin:0; padding-left: 20px; color:#3a3a3a; font-size:0.92rem; }
+  .plan-phase li{ margin-bottom:7px; }
+
+  .path-card{ border: 1.5px solid var(--line); border-radius: 14px; padding: 20px 22px; background: rgba(255,255,255,0.6); margin-bottom: 14px; }
+  .path-card h4{ margin:0 0 8px; color: var(--royal); font-size:1.02rem; }
+  .path-card p{ margin: 0 0 14px; font-size:0.92rem; color:#3a3a3a; }
+  .path-card .soon-tag{ display:inline-block; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#8a8a8a; background:#eee; padding:3px 10px; border-radius:999px; margin-left:8px; }
+  .path-card .price-tag{ display:inline-block; font-family:'Fraunces', serif; font-size:1.4rem; color: var(--gold); margin: 6px 0 12px; }
+  .path-card .fine-print{ font-size:0.78rem; color:#777; margin-top:10px; }
+
+  .share-box{ border: 1.5px dashed var(--sage); border-radius: 14px; padding: 20px 22px; background: rgba(156,175,136,0.08); margin-bottom: 30px; }
+  .share-box h4{ margin:0 0 10px; color:#4d5c40; font-size:1.02rem; }
+  .share-box textarea{ width:100%; min-height:110px; font-family:'Inter', sans-serif; font-size:0.9rem; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); background: rgba(255,255,255,0.85); color: var(--ink); resize:vertical; margin-bottom:12px; }
+  .copy-status{ font-size:0.8rem; color: var(--sage); font-weight:600; margin-left:10px; }
+
+  .next-step{ border-radius: 16px; padding: 28px 26px; background: var(--royal); color: var(--ivory); margin-bottom: 26px; }
+  .next-step h3{ color: var(--ivory); margin:0 0 10px; font-size:1.25rem; }
+  .next-step p{ color: rgba(255,249,238,0.9); margin: 0 0 20px; max-width:58ch; }
+
+  .disclaimer{ font-size: 0.78rem; color: #6b6b6b; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 34px; max-width: 68ch; }
+  .disclaimer strong{ color: var(--ink); }
+  footer.foot{ text-align:center; font-size:0.75rem; color:#8a8a8a; margin-top: 40px; }
+
+  .locked-note{ font-size:0.85rem; color:#777; background:#f2f2f2; border-radius:8px; padding:10px 14px; margin-bottom:18px; }
+  .dash-header{ margin-bottom: 22px; }
+  .dash-header h2{ color: var(--royal); margin: 0 0 6px; font-size:1.7rem; }
+  .dash-sub{ color: var(--purple); font-style: italic; font-family:'Fraunces', serif; font-size:1rem; margin:0 0 18px; }
+  .dash-stats{ display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom: 22px; }
+  @media (max-width: 560px){ .dash-stats{ grid-template-columns: 1fr; } }
+  .stat-box{ border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 16px; background: rgba(255,255,255,0.65); }
+  .stat-box .stat-label{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color: var(--purple); font-weight:700; }
+  .stat-box .stat-value{ font-family:'Fraunces', serif; font-size:1.25rem; color: var(--royal); margin-top:4px; }
+  .dash-nav{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 26px; }
+  .dash-nav button{ flex: 1 1 150px; }
+  .panel{ display:none; border-top: 1px solid var(--line); padding-top: 22px; }
+  .panel.active{ display:block; }
+  .week-list-item{ display:flex; justify-content:space-between; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px; background: rgba(255,255,255,0.6); flex-wrap:wrap; }
+  .week-list-item .wl-title{ font-weight:600; color: var(--royal); }
+  .week-list-item .wl-phase{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color: var(--gold); font-weight:700; }
+  .status-pill{ font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:0.04em; }
+  .status-pill.done{ background: rgba(156,175,136,0.25); color:#33472a; }
+  .status-pill.open{ background: rgba(24,58,143,0.1); color: var(--royal); }
+  .module-block{ border:1.5px solid var(--line); border-radius:14px; padding:20px 22px; background: rgba(255,255,255,0.65); margin-bottom:18px; }
+  .module-block h3{ color: var(--royal); margin:0 0 6px; }
+  .module-block .phase-tag{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color: var(--gold); font-weight:700; }
+  .exercise-block{ margin-bottom:16px; }
+  .exercise-block label{ display:block; font-weight:600; font-size:0.88rem; color: var(--royal); margin-bottom:6px; }
+  .exercise-block textarea{ width:100%; min-height:80px; font-family:'Inter',sans-serif; font-size:0.92rem; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:rgba(255,255,255,0.8); resize:vertical; }
+  .day-nav{ display:flex; align-items:center; gap:10px; margin: 18px 0 12px; flex-wrap:wrap; }
+  .day-nav .day-indicator{ font-weight:700; color: var(--royal); }
+  .affirmation{ font-style:italic; color: var(--purple); font-family:'Fraunces', serif; margin: 10px 0; }
+  .checkin-row{ display:grid; grid-template-columns: 1fr auto; align-items:center; gap:10px; margin-bottom:10px; }
+  .checkin-scale{ display:flex; gap:6px; }
+  .checkin-scale button{ width:32px; height:32px; border-radius:8px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-weight:700; color: var(--royal); }
+  .checkin-scale button.selected{ background: var(--royal); color:#fff; border-color: var(--royal); }
+  .journal-entry{ border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:12px; background: rgba(255,255,255,0.6); }
+  .journal-entry .je-meta{ font-size:0.72rem; color:#888; margin-bottom:6px; }
+  .progress-metric{ display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:8px 0; font-size:0.92rem; }
+  .streak-badge{ display:inline-block; background: rgba(200,164,77,0.15); color:#7a5f22; font-weight:700; padding:6px 14px; border-radius:999px; font-size:0.85rem; margin-right:8px; }
+  .cert-card{ border: 3px double var(--gold); border-radius: 14px; padding: 34px 26px; text-align:center; background: rgba(255,249,238,0.7); }
+  .cert-card h2{ color: var(--royal); margin: 4px 0; }
+  .cert-card .cert-name{ font-family:'Fraunces', serif; font-size:1.6rem; color: var(--purple); margin: 14px 0; }
+  .download-list{ display:flex; flex-direction:column; gap:10px; }
+  .download-item{ display:flex; justify-content:space-between; align-items:center; border:1.5px solid var(--line); border-radius:10px; padding:12px 16px; background: rgba(255,255,255,0.6); flex-wrap:wrap; gap:8px; }
+  .referral-box{ border: 1.5px dashed var(--purple); border-radius:14px; padding:18px 20px; background: rgba(107,63,160,0.06); margin-top: 20px; }
+  .coaching-invite{ border-radius:14px; padding:20px 22px; background: rgba(24,58,143,0.06); border:1.5px solid var(--line); margin: 20px 0; }
+  .distress-note{ font-size:0.82rem; color:#4a4a4a; background:#fff4e6; border-left:3px solid var(--gold); padding:10px 14px; border-radius:8px; margin-bottom:18px; }
+  .legal-links{ font-size:0.78rem; color:#888; margin-top:16px; }
+  .legal-links a{ color:#888; margin-right:12px; }
+
+  @media print{
+    body{ background: #fff !important; }
+    header.brand .badge, .no-print{ display:none !important; }
+    .screen{ display:none !important; }
+    #screen-results.print-active, #printArea.print-active{ display:block !important; }
+    .wrap{ max-width: 100%; padding: 10px; }
+    .season-card, .next-step, .priority-card, .strength-card, .blocker-card, .plan-phase, .path-card, .share-box{ break-inside: avoid; }
+    .btn-row{ display:none !important; }
+    #printArea{ display:none; }
+  }
+
+  @media (max-width: 480px){
+    .wrap{ padding: 22px 16px 60px; }
+    .q-text{ font-size: 1.08rem; }
+    .btn{ width:100%; }
+    .btn-row{ flex-direction:column; }
+    .quiz-nav{ flex-direction:column-reverse; align-items:stretch; }
+    .scale-btn{ min-width: 56px; padding: 12px 4px; }
+    .scale-btn .lbl{ display:none; }
+    .dash-nav button{ flex: 1 1 100%; }
+  }
+
+  /* ---- Offer / sales page (peaceful, confident redesign) ---- */
+  .offer-hero{ background: linear-gradient(160deg, var(--mist), var(--cream)); border-radius:18px; padding:30px 26px; margin-bottom:26px; border:1px solid var(--line); }
+  .offer-hero h2{ color: var(--navy-text); font-size:1.7rem; margin:0 0 10px; }
+  .offer-hero p{ color: var(--charcoal); font-size:1rem; max-width:60ch; }
+  .price-block{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .price-old{ font-family:'Fraunces',serif; font-size:1.4rem; color:#8a8f9c; text-decoration: line-through; text-decoration-color:#8a8f9c; }
+  .price-old .sr-label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  .price-new{ font-family:'Fraunces',serif; font-size:2.6rem; color: var(--gold); font-weight:700; }
+  .price-save{ font-size:0.82rem; font-weight:700; color:#4d5c40; background: rgba(156,175,136,0.2); padding:4px 12px; border-radius:999px; }
+  .price-terms{ display:flex; gap:16px; flex-wrap:wrap; font-size:0.82rem; color: var(--charcoal); margin-top:10px; }
+  .price-terms span::before{ content:"✓ "; color: var(--sage); font-weight:700; }
+  .value-row{ display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:10px 0; font-size:0.92rem; color: var(--charcoal); }
+  .value-row.total{ font-weight:700; color: var(--navy-text); border-bottom:none; border-top:2px solid var(--line); padding-top:14px; margin-top:6px; }
+  .faq-item{ border-bottom:1px solid var(--line); padding:16px 0; }
+  .faq-item h4{ color: var(--navy-text); margin:0 0 8px; font-size:0.98rem; }
+  .faq-item p{ color: var(--charcoal); font-size:0.92rem; margin:0; }
+  .benefit-item{ display:flex; gap:12px; padding:12px 0; border-bottom:1px dashed var(--line); }
+  .benefit-item .num{ font-family:'Fraunces',serif; color: var(--gold); font-weight:700; flex:0 0 auto; }
+  .benefit-item div p{ margin:2px 0 0; font-size:0.88rem; color: var(--charcoal); }
+  .auth-card{ border:1.5px solid var(--line); border-radius:14px; padding:26px; background: rgba(255,255,255,0.7); max-width:420px; }
+  .auth-switch{ font-size:0.85rem; color: var(--charcoal); margin-top:14px; }
+  .auth-switch a{ color: var(--royal); cursor:pointer; font-weight:600; }
+  .coaching-rec-card{ border:2px solid var(--purple); border-radius:16px; padding:24px; background: var(--lavender); margin-bottom:20px; }
+  .coaching-rec-card h4{ color: var(--purple); margin:0 0 8px; }
+  .account-row{ display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:10px 0; font-size:0.9rem; }
+  .onboarding-item{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:0.92rem; color: var(--charcoal); }
+  .onboarding-item input{ width:18px; height:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="brand">
+    <div class="brand-mark">
+      <svg class="brand-glyph" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="36" height="36" rx="8" stroke="#183A8F" stroke-width="2"/>
+        <path d="M11 27V13L20 20L29 13V27" stroke="#C8A44D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-name">Kingdom Blueprint Legacy
+        <span>The Blueprint Code™</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="text-size-toggle no-print" aria-label="Adjust text size">
+        <button type="button" onclick="adjustFontScale(-0.1)" aria-label="Decrease text size">A-</button>
+        <button type="button" onclick="adjustFontScale(0.1)" aria-label="Increase text size">A+</button>
+      </div>
+      <div class="badge">Readiness Assessment</div>
+    </div>
+  </header>
+
+  <!-- ===================== WELCOME SCREEN ===================== -->
+  <section id="screen-welcome" class="screen active">
+    <div class="hero-eyebrow">A Coaching Self-Reflection Tool</div>
+    <h1 class="hero-title">The Blueprint Code™ Readiness Assessment</h1>
+    <p class="hero-tagline">Stop surviving. Start building the life you were created to live.</p>
+    <p class="lede">This assessment will help you get honest about where you stand today &mdash; what's working, what may be quietly blocking you, and what to focus on next &mdash; as you pursue the life, calling, career, or next season you feel drawn toward. It takes about 10&ndash;15 minutes.</p>
+
+    <p class="safety-note">The Blueprint Code™ is a personal development and coaching resource. It is not therapy, mental-health treatment, medical advice, diagnosis, crisis care, or a spiritual prophecy.</p>
+
+    <div id="resumeBanner" class="resume-banner" style="display:none;">
+      <p>You have saved progress waiting for you.</p>
+      <div class="btn-row" style="margin:0;">
+        <button class="btn btn-outline" onclick="resumeProgress()">Resume Assessment</button>
+        <button class="btn btn-outline" onclick="clearProgress(true)">Start Over</button>
+      </div>
+    </div>
+
+    <div id="dashboardEntryBanner" class="resume-banner" style="display:none; background: rgba(156,175,136,0.14); border-color: rgba(156,175,136,0.4);">
+      <p style="color:#4d5c40;">You have unlocked access to your 90-Day Journey.</p>
+      <div class="btn-row" style="margin:0;">
+        <button class="btn btn-sage" onclick="goToDashboard()">Open My Journey</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="nameInput">What's your first name? (optional, used to personalize your results)</label>
+      <input type="text" id="nameInput" placeholder="e.g. Jordan" maxlength="40">
+    </div>
+
+    <div class="blueprint-frame">
+      <h3>What this assessment covers</h3>
+      <ul>
+        <li>Clarity, Confidence, and Structure</li>
+        <li>Recovery &amp; Resilience and Support &amp; Boundaries</li>
+        <li>Execution &mdash; turning intentions into action</li>
+        <li>A few open reflection questions at the end</li>
+        <li>A personalized Blueprint Season, readiness snapshot, growth priorities, primary blocker, and a 90-day plan</li>
+      </ul>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="startAssessment()">Begin the Assessment</button>
+    </div>
+
+    <p class="disclaimer">
+      <strong>Please note:</strong> The Blueprint Code™ is a coaching and self-reflection tool created by Kingdom Blueprint Legacy for personal growth and strategic planning purposes. It does not diagnose any medical, psychological, or mental health condition, and it is not a substitute for professional medical, mental health, or therapeutic care, nor is it a statement of God's will for your life. If you are in crisis or need clinical support, please contact a licensed professional or your local emergency services.
+    </p>
+  </section>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <section id="screen-quiz" class="screen">
+    <div class="progress-label">
+      <span id="progressText">Question 1 of 29</span>
+      <span id="progressPercent">3%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+
+    <div id="q-category" class="q-category">Clarity</div>
+    <h2 id="q-text" class="q-text">Question text goes here</h2>
+
+    <div id="scoredWrap" class="scale-wrap">
+      <div class="scale-row" id="scaleRow"></div>
+      <div class="scale-ends"><span>Rarely true</span><span>Consistently true</span></div>
+    </div>
+
+    <div id="reflectWrap" class="reflect-wrap" style="display:none;">
+      <p class="reflect-note">This question is optional &mdash; answer as much or as little as feels right.</p>
+      <textarea id="reflectInput" placeholder="Type your thoughts here..."></textarea>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="btn btn-outline" id="backBtn" onclick="goBack()">Back</button>
+      <div class="btn-row" style="margin:0;">
+        <button class="btn btn-outline" onclick="saveAndExit()">Save &amp; Exit</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="goNext()" disabled>Next</button>
+      </div>
+    </div>
+    <p class="save-note">Your progress saves automatically to this device so you can pick up where you left off.</p>
+  </section>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <section id="screen-results" class="screen">
+    <p class="personal-greeting" id="personalGreeting"></p>
+
+    <p class="safety-note">The Blueprint Code™ is a personal development and coaching resource. It is not therapy, mental-health treatment, medical advice, diagnosis, crisis care, or a spiritual prophecy.</p>
+
+    <div class="result-section">
+      <div class="result-eyebrow">1. Your Current Blueprint Season</div>
+      <div class="season-card">
+        <div class="tier-eyebrow">Season</div>
+        <h2 class="season-name" id="seasonName">Season Name</h2>
+        <p class="season-desc" id="seasonDesc">Description</p>
+        <p class="season-focus" id="seasonFocus">Focus</p>
+        <p class="season-reminder">Seasons are temporary. Through action, support, reflection, and growth, this can shift &mdash; this is a snapshot of today, not a permanent label.</p>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">2. Overall Readiness</div>
+      <div class="readiness-card">
+        <p class="readiness-pct" id="readinessPct">0%</p>
+        <div class="readiness-meter"><div class="readiness-meter-fill" id="readinessFill" style="width:0%;"></div></div>
+        <p class="readiness-interp" id="readinessInterp"></p>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">3. Top Three Growth Priorities</div>
+      <div id="priorityList"></div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">4. Core Strengths</div>
+      <div id="strengthListWrap"></div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">5. Primary Growth Blocker</div>
+      <div class="blocker-card">
+        <h3 class="blocker-name" id="blockerName">Blocker Name</h3>
+        <p><span class="label">What it may look like:</span> <span id="blockerAppearance"></span></p>
+        <p id="blockerExplanation"></p>
+        <p><span class="label">A belief to challenge:</span> <span id="blockerBelief"></span></p>
+        <p><span class="label">This week:</span> <span id="blockerAction"></span></p>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">6. Your Personalized 90-Day Blueprint</div>
+      <div class="plan-phase">
+        <span class="phase-range">Days 1&ndash;30 &middot; Clarify &amp; Stabilize</span>
+        <ul id="phase1List"></ul>
+      </div>
+      <div class="plan-phase">
+        <span class="phase-range">Days 31&ndash;60 &middot; Build &amp; Practice</span>
+        <ul id="phase2List"></ul>
+      </div>
+      <div class="plan-phase">
+        <span class="phase-range">Days 61&ndash;90 &middot; Expand &amp; Sustain</span>
+        <ul id="phase3List"></ul>
+      </div>
+    </div>
+
+    <div class="share-box">
+      <h4>Share Your Results</h4>
+      <textarea id="shareText" readonly></textarea>
+      <button class="btn btn-sage no-print" onclick="copyShareText()">Copy to Clipboard</button>
+      <span class="copy-status" id="copyStatus"></span>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">7. Next Step</div>
+      <div class="path-card">
+        <h4>Path 1: Continue Independently</h4>
+        <p>Use your personalized Blueprint, review your progress weekly, and choose one meaningful action at a time.</p>
+      </div>
+
+      <div class="path-card" id="path2Card">
+        <h4>Path 2: Unlock Your Personalized 90-Day Journey</h4>
+        <p>Your assessment revealed where you are, what may be limiting your progress, and which strengths can help you move forward. Unlock a personalized 90-day digital journey built around your Blueprint Season, primary blocker, growth priorities, strengths, goals, and written reflections.</p>
+        <span class="price-tag">$27 <span style="font-size:0.9rem; color:#777; font-family:'Inter',sans-serif;">one-time</span></span>
+        <p class="fine-print">Pay once and receive lifetime access to your personalized module, future revisions of your saved plan, interactive exercises, progress tools, and downloadable resources included in this version.</p>
+        <div class="btn-row" id="path2ButtonRow"></div>
+        <p class="fine-print">Prefer personal guidance? <a href="https://cal.com/kingdom-blueprint-legacy-qj14cj" target="_blank" rel="noopener noreferrer">Book a one-on-one strategy session.</a></p>
+      </div>
+
+      <div class="next-step">
+        <h3>Path 3: Book a Personal Strategy Session</h3>
+        <p>Receive personalized support to turn your results into a focused plan for your life, career, business, or next season.</p>
+        <a class="btn btn-gold" href="https://cal.com/kingdom-blueprint-legacy-qj14cj" target="_blank" rel="noopener noreferrer">Book My Strategy Session &rarr;</a>
+      </div>
+    </div>
+
+    <div class="btn-row no-print">
+      <button class="btn btn-purple" onclick="window.print()">Print / Save as PDF</button>
+      <button class="btn btn-outline" onclick="retakeAssessment()">Retake Assessment</button>
+    </div>
+
+    <p class="disclaimer">
+      <strong>Please note:</strong> These results reflect your own self-reported answers and are intended for personal coaching and reflection purposes only. The Blueprint Code™ does not diagnose any medical, psychological, or mental health condition, is not therapy, mental-health treatment, medical advice, crisis care, or a spiritual prophecy, and is not a substitute for professional care. If you are in crisis or need clinical support, please contact a licensed professional or your local emergency services.
+    </p>
+  </section>
+
+  <!-- ===================== OFFER / PAYWALL SCREEN ===================== -->
+  <section id="screen-paywall" class="screen">
+
+    <div class="offer-hero">
+      <div class="hero-eyebrow">Path 2 &middot; Personalized 90-Day Journey</div>
+      <h2>Your Assessment Gave You Insight. Your Personalized Blueprint Helps You Act on It.</h2>
+      <p>You do not need another generic workbook filled with advice that does not fit your life. The Blueprint Code™ turns your assessment results into a guided 90-day experience built around your season, strengths, blockers, priorities, and goals.</p>
+
+      <div class="price-block">
+        <span class="price-old"><span class="sr-label">Regular price: </span>$65</span>
+        <span class="price-new"><span class="sr-label">Launch sale price: </span>$27</span>
+        <span class="price-save">You Save $38</span>
+      </div>
+      <p class="price-terms">
+        <span>One Payment</span><span>No Subscription</span><span>Lifetime Access</span><span>Personalized to your assessment</span>
+      </p>
+      <p style="font-size:0.8rem; color:var(--charcoal);" id="saleEndNote"></p>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="handleUnlockClick()">Unlock My Personalized Journey for $27</button>
+        <button class="btn btn-outline" onclick="document.getElementById('offerBenefitsList').scrollIntoView({behavior:'smooth'})">Preview What Is Included</button>
+      </div>
+      <p style="font-size:0.8rem; color:var(--charcoal); margin-top:10px;">Secure checkout &middot; Private customer account &middot; Progress saved &middot; Lifetime product access</p>
+    </div>
+
+    <p class="safety-note">The Blueprint Code™ is a personal development and coaching resource. It is not therapy, mental-health treatment, medical advice, diagnosis, crisis care, or a spiritual prophecy.</p>
+
+    <div class="result-section">
+      <div class="result-eyebrow">What Your Assessment Revealed</div>
+      <div id="offerAssessmentPreview" class="module-block"></div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">Everything Included</div>
+      <div id="offerBenefitsList"></div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">Honest Value Comparison</div>
+      <div class="module-block">
+        <div class="value-row"><span>Personalized assessment interpretation</span><span>$15</span></div>
+        <div class="value-row"><span>Twelve guided weekly modules</span><span>$25</span></div>
+        <div class="value-row"><span>Ninety-day planner and action system</span><span>$15</span></div>
+        <div class="value-row"><span>Journal, trackers, and printable tools</span><span>$10</span></div>
+        <div class="value-row total"><span>Total stated product value</span><span>$65</span></div>
+        <div class="value-row total" style="color:var(--gold);"><span>Launch price</span><span>$27</span></div>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-eyebrow">Frequently Asked Questions</div>
+      <div class="faq-item"><h4>Is this a subscription?</h4><p>No. The $27 launch price is a one-time payment.</p></div>
+      <div class="faq-item"><h4>What does lifetime access mean?</h4><p>Lifetime access means continued access to this purchased digital product through your active customer account for as long as Kingdom Blueprint Legacy supports and operates the product. It does not include unlimited private coaching, every future product, or unrelated services.</p></div>
+      <div class="faq-item"><h4>Is this personalized?</h4><p>Yes. Your assessment scores, Blueprint Season, strengths, priorities, blocker, goals, and written reflections shape the recommendations and activities you receive.</p></div>
+      <div class="faq-item"><h4>Is this therapy?</h4><p>No. This is a personal-development and coaching resource. It is not therapy, medical treatment, mental-health treatment, diagnosis, crisis care, or spiritual prophecy.</p></div>
+      <div class="faq-item"><h4>Can I repeat the program?</h4><p>Yes. Your account allows you to revisit completed materials and begin a new personal 90-day cycle without purchasing the same product again.</p></div>
+      <div class="faq-item"><h4>Do I receive private coaching?</h4><p>Private coaching is not included in the $27 digital-product purchase. The application may recommend an appropriate coaching service, which can be booked separately.</p></div>
+      <div class="faq-item"><h4>Can I share my account?</h4><p>No. Lifetime access is licensed to the original purchaser for personal use.</p></div>
+      <div class="faq-item"><h4>What happens if I lose my password?</h4><p>Use the secure password-reset function connected to your verified email address.</p></div>
+      <div class="faq-item"><h4>What if my payment succeeds but access is not visible?</h4><p>You'll see a support message and a button to refresh verification. Please don't purchase again — contact support first.</p></div>
+    </div>
+
+    <p class="disclaimer">Your $27 purchase provides lifetime access to this digital product for your personal use, including the personalized modules and resources available with your purchase. Private coaching, future premium programs, live events, certifications, and unrelated products are not included unless specifically stated. This product is licensed for one person's personal use only &mdash; resale, redistribution, shared logins, and commercial rebranding are not permitted. Your purchase includes access to future improvements made to this specific digital product while it remains supported by Kingdom Blueprint Legacy. This program does not guarantee healing, income, success, or personal transformation.</p>
+
+    <div class="next-step">
+      <h3>You already know something needs to change.</h3>
+      <p>You do not have to change everything today. Begin with one clear plan, one intentional action, and one faithful step.</p>
+      <div class="btn-row"><button class="btn btn-gold" onclick="handleUnlockClick()">Unlock My Personalized Journey — $27</button></div>
+    </div>
+
+    <div class="path-card">
+      <h4>Prefer Private Coaching Instead?</h4>
+      <p>If you'd rather work directly with someone, you can book a private strategy session instead of (or in addition to) the digital journey.</p>
+      <a class="btn btn-outline btn-small" href="https://cal.com/kingdom-blueprint-legacy-qj14cj" target="_blank" rel="noopener noreferrer">Book a Strategy Session</a>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showScreen('screen-results')">Back to Results</button>
+    </div>
+    <div id="devPreviewRow" class="btn-row" style="display:none;">
+      <button class="btn btn-outline" onclick="devUnlockPreview()">Developer Preview: Skip to Dashboard</button>
+    </div>
+    <p class="legal-links">
+      <a href="#" onclick="return false;">Terms of Use</a>
+      <a href="#" onclick="return false;">Privacy Policy</a>
+      <a href="#" onclick="return false;">Refund Policy</a>
+      <a href="#" onclick="return false;">Digital Product License</a>
+    </p>
+  </section>
+
+  <!-- ===================== AUTH SCREEN (sign up / sign in / forgot password) ===================== -->
+  <section id="screen-auth" class="screen">
+    <div class="hero-eyebrow">Your Account</div>
+    <h2 style="color:var(--navy-text);">Create an account or sign in to continue</h2>
+    <p class="safety-note">The Blueprint Code™ is a personal development and coaching resource. It is not therapy, mental-health treatment, medical advice, diagnosis, crisis care, or a spiritual prophecy.</p>
+
+    <div class="auth-card">
+      <div id="authSignUpForm">
+        <div class="field-group"><label for="suFirstName">First name</label><input type="text" id="suFirstName" maxlength="40"></div>
+        <div class="field-group"><label for="suEmail">Email address</label><input type="email" id="suEmail" maxlength="120"></div>
+        <div class="field-group"><label for="suPassword">Password</label><input type="password" id="suPassword" maxlength="100"></div>
+        <div class="consent-row">
+          <input type="checkbox" id="authConsent1">
+          <label for="authConsent1">I understand that this is a personal-development and coaching resource, not therapy, medical care, mental-health treatment, crisis support, or spiritual prophecy.</label>
+        </div>
+        <div class="consent-row">
+          <input type="checkbox" id="authConsent2">
+          <label for="authConsent2">I agree to use my assessment answers to create my personalized 90-day module.</label>
+        </div>
+        <div class="consent-row">
+          <input type="checkbox" id="authConsent3">
+          <label for="authConsent3">I understand that lifetime access applies to this purchased digital product and included updates, not unlimited private coaching.</label>
+        </div>
+        <p id="authError" style="color:#a33; font-size:0.85rem; display:none;"></p>
+        <div class="btn-row"><button class="btn btn-primary" onclick="signUpCustomer()">Create Account</button></div>
+        <p class="auth-switch">Already have an account? <a onclick="showAuthMode('signin')">Sign in</a></p>
+      </div>
+
+      <div id="authSignInForm" style="display:none;">
+        <div class="field-group"><label for="siEmail">Email address</label><input type="email" id="siEmail" maxlength="120"></div>
+        <div class="field-group"><label for="siPassword">Password</label><input type="password" id="siPassword" maxlength="100"></div>
+        <p id="authErrorSignIn" style="color:#a33; font-size:0.85rem; display:none;"></p>
+        <div class="btn-row"><button class="btn btn-primary" onclick="signInCustomer()">Sign In</button></div>
+        <p class="auth-switch">New here? <a onclick="showAuthMode('signup')">Create an account</a> &middot; <a onclick="showAuthMode('forgot')">Forgot password?</a></p>
+      </div>
+
+      <div id="authForgotForm" style="display:none;">
+        <div class="field-group"><label for="fpEmail">Email address</label><input type="email" id="fpEmail" maxlength="120"></div>
+        <p id="authForgotStatus" style="font-size:0.85rem; color:var(--sage); display:none;"></p>
+        <div class="btn-row"><button class="btn btn-primary" onclick="resetCustomerPassword()">Send Reset Link</button></div>
+        <p class="auth-switch"><a onclick="showAuthMode('signin')">Back to sign in</a></p>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:16px;"><button class="btn btn-outline" onclick="showScreen('screen-paywall')">Back</button></div>
+  </section>
+
+  <!-- ===================== PURCHASE SUCCESS / VERIFYING SCREEN ===================== -->
+  <section id="screen-purchase-success" class="screen">
+    <div class="hero-eyebrow">Almost There</div>
+    <h2 style="color:var(--navy-text);" id="purchaseSuccessHeading">Verifying your purchase…</h2>
+    <p id="purchaseSuccessMessage">Your payment was received and is being verified. This usually takes just a moment.</p>
+    <div class="btn-row"><button class="btn btn-primary" onclick="checkVerifiedProductAccess(true)">Refresh Verification</button></div>
+    <p style="font-size:0.85rem; color:var(--charcoal); margin-top:14px;">If your payment succeeded but access still isn't showing after a few minutes, please contact <span id="supportEmailDisplay"></span> — do not purchase again.</p>
+  </section>
+
+  <!-- ===================== ACCOUNT SCREEN ===================== -->
+  <section id="screen-account" class="screen">
+    <div class="hero-eyebrow">Your Account</div>
+    <h2 style="color:var(--navy-text);">Account &amp; Access</h2>
+    <div id="accountDetailsWrap" class="module-block"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline btn-small" onclick="exportCustomerData()">Export My Data</button>
+      <button class="btn btn-outline btn-small" onclick="requestAccountDeletion()">Request Account Deletion</button>
+      <button class="btn btn-outline btn-small" onclick="signOutCustomer()">Sign Out</button>
+    </div>
+    <div class="btn-row"><button class="btn btn-outline" onclick="showScreen('screen-dashboard')">Back to Dashboard</button></div>
+  </section>
+
+  <!-- ===================== DASHBOARD SCREEN ===================== -->
+  <section id="screen-dashboard" class="screen">
+    <div class="dash-header">
+      <h2 id="dashWelcome">Welcome back, Friend</h2>
+      <p class="dash-sub">Your next chapter does not require perfection. It requires clarity, support, and intentional action.</p>
+      <p class="safety-note">The Blueprint Code™ is a personal development and coaching resource. It is not therapy, mental-health treatment, medical advice, diagnosis, crisis care, or a spiritual prophecy.</p>
+      <p class="distress-note">If an exercise brings up intense distress, pause the activity and consider contacting a qualified healthcare or mental-health professional. In an emergency, contact local emergency services.</p>
+    </div>
+
+    <div id="onboardingChecklistWrap"></div>
+
+    <div class="dash-stats" id="dashStats"></div>
+
+    <div class="dash-nav no-print">
+      <button class="btn btn-primary" onclick="showPanel('continue')">Continue Journey</button>
+      <button class="btn btn-outline" onclick="showScreen('screen-results')">View My Assessment Results</button>
+      <button class="btn btn-outline" onclick="showPanel('plan')">Open My 90-Day Plan</button>
+      <button class="btn btn-outline" onclick="showPanel('checkin')">Weekly Check-In</button>
+      <button class="btn btn-outline" onclick="showPanel('journal')">My Journal</button>
+      <button class="btn btn-outline" onclick="showPanel('progress')">Progress Tracker</button>
+      <button class="btn btn-outline" onclick="showPanel('downloads')">Download My Blueprint</button>
+      <button class="btn btn-outline" onclick="showPanel('coaching')">Recommended Coaching</button>
+      <button class="btn btn-outline" onclick="showScreen('screen-account'); loadCustomerProfile();">My Account</button>
+    </div>
+
+    <div id="panel-continue" class="panel active">
+      <div id="moduleContainer"></div>
+      <div class="day-nav no-print">
+        <button class="btn btn-outline btn-small" onclick="changeDay(-1)">&larr; Previous Day</button>
+        <span class="day-indicator" id="dayIndicator">Day 1 of 90</span>
+        <button class="btn btn-outline btn-small" onclick="changeDay(1)">Next Day &rarr;</button>
+      </div>
+      <div id="dailyActionContainer"></div>
+    </div>
+
+    <div id="panel-plan" class="panel">
+      <h3 style="color:var(--royal);">Your 90-Day Plan</h3>
+      <div id="weekListWrap"></div>
+    </div>
+
+    <div id="panel-checkin" class="panel">
+      <h3 style="color:var(--royal);">Weekly Check-In</h3>
+      <div id="checkinWrap"></div>
+    </div>
+
+    <div id="panel-journal" class="panel">
+      <h3 style="color:var(--royal);">My Journal</h3>
+      <p class="locked-note">Entries saved only in this browser may be lost if browser data is cleared or you change devices.</p>
+      <div class="field-group">
+        <label for="journalSearch">Search entries</label>
+        <input type="text" id="journalSearch" oninput="renderJournalList()" placeholder="Search by keyword...">
+      </div>
+      <div class="module-block">
+        <label for="journalEntryText" style="display:block; font-weight:600; color:var(--royal); margin-bottom:6px;">New Entry</label>
+        <input type="text" id="journalModuleLabel" placeholder="Module or topic (optional)" style="width:100%; margin-bottom:10px; padding:10px; border-radius:8px; border:1.5px solid var(--line);">
+        <textarea id="journalEntryText" placeholder="Write your entry..." style="width:100%; min-height:100px; padding:10px; border-radius:8px; border:1.5px solid var(--line); margin-bottom:10px;"></textarea>
+        <label style="font-size:0.85rem;">Mood / energy (1&ndash;5)</label>
+        <div class="checkin-scale" id="journalMoodRow" style="margin:8px 0 12px;"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-small" onclick="addJournalEntry()">Save Entry</button>
+          <button class="btn btn-outline btn-small" onclick="exportJournal()">Export Journal</button>
+        </div>
+      </div>
+      <div id="journalListWrap"></div>
+    </div>
+
+    <div id="panel-progress" class="panel">
+      <h3 style="color:var(--royal);">Progress Tracker</h3>
+      <div id="progressWrap"></div>
+    </div>
+
+    <div id="panel-downloads" class="panel">
+      <h3 style="color:var(--royal);">Downloadable Resources</h3>
+      <div class="download-list" id="downloadListWrap"></div>
+    </div>
+
+    <div id="panel-certificate" class="panel">
+      <h3 style="color:var(--royal);">Completion Certificate</h3>
+      <div id="certificateWrap"></div>
+    </div>
+
+    <div id="panel-coaching" class="panel">
+      <h3 style="color:var(--royal);">Recommended Coaching</h3>
+      <div id="coachingRecWrap"></div>
+    </div>
+
+    <div class="referral-box no-print">
+      <p>Know someone who may benefit from building their own Blueprint? Share the public assessment with them.</p>
+      <div class="btn-row"><button class="btn btn-outline btn-small" onclick="copyReferralLink()">Copy Public Assessment Link</button></div>
+      <span class="copy-status" id="referralCopyStatus"></span>
+    </div>
+  </section>
+
+  <!-- Hidden printable area used for single-resource downloads/printing -->
+  <div id="printArea"></div>
+
+  <footer class="foot">&copy; <span id="year"></span> Kingdom Blueprint Legacy &mdash; The Blueprint Code™</footer>
+</div>
+
+<script>
+/* ============================================================
+   DEVELOPER NOTE — VERSION 2
+   Version 2 may later introduce descriptive coaching-style
+   archetypes (presented as coaching styles, not psychological
+   categories), such as: The Vision Builder, The Steward Builder,
+   The Catalyst Builder, The Restorer Builder, The Legacy Builder.
+   These are intentionally NOT included in this version's scoring
+   or results — only the six dimensions and Blueprint Seasons below.
+============================================================ */
+
+/* ============================================================
+   SECTION: PURCHASE CONFIGURATION
+   Replace PAYMENT_CHECKOUT_URL with a real secure checkout link
+   (e.g. Stripe Payment Link, Gumroad, ThriveCart, Shopify, etc.)
+   before going live. Until replaced, the purchase button will
+   show a "secure checkout is being connected" message instead of
+   pretending a payment occurred.
+============================================================ */
+const PAYMENT_CHECKOUT_URL = "ADD_SECURE_CHECKOUT_LINK_HERE"; // legacy fallback only — superseded by Supabase Edge Function checkout below
+const PUBLIC_ASSESSMENT_URL = "ADD_PUBLIC_ASSESSMENT_URL_HERE";
+
+/* DEVELOPMENT_PREVIEW_MODE lets a developer preview the entire
+   paid journey without paying. MUST be false in production. */
+const DEVELOPMENT_PREVIEW_MODE = false;
+
+/* ============================================================
+   SECTION: SUPABASE CONFIGURATION
+   Only the URL and the ANON (public) key belong in browser code.
+   The service-role key, Stripe secret key, and webhook signing
+   secret must NEVER appear here — they live only as Supabase Edge
+   Function secrets (see SETUP.md).
+============================================================ */
+const SUPABASE_URL = "ADD_SUPABASE_PROJECT_URL_HERE";
+const SUPABASE_ANON_KEY = "ADD_SUPABASE_ANON_KEY_HERE";
+const SUPPORT_EMAIL = "ADD_SUPPORT_EMAIL";
+
+/* ============================================================
+   INTERIM CHECKOUT: DIRECT STRIPE PAYMENT LINK
+   Until Supabase is configured (create-checkout-session /
+   verify-product-access), Path 2 checks out through this Stripe
+   Payment Link instead. This is a real, working checkout — but
+   access on return is NOT server-verified (see the loud warning
+   in handlePaymentReturn() below). Once Supabase is live, this
+   path is bypassed automatically and the secure flow takes over.
+============================================================ */
+const DIRECT_STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oU6oGbbh4z31fd24M1gs00";
+
+let supabaseClient = null;
+function isSupabaseConfigured(){
+  return SUPABASE_URL && !SUPABASE_URL.startsWith("ADD_") && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith("ADD_");
+}
+function getSupabaseClient(){
+  if(!isSupabaseConfigured()) return null;
+  if(!supabaseClient && window.supabase){
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return supabaseClient;
+}
+
+/* ============================================================
+   SECTION: PRODUCT / PRICING CONFIGURATION
+============================================================ */
+const PRODUCT_CONFIG = {
+  name: "The Blueprint Code™ Personalized 90-Day Growth Journey",
+  regularPrice: 65,
+  salePrice: 27,
+  currency: "USD",
+  stripePriceId: "ADD_STRIPE_PRICE_ID",
+  saleLabel: "Launch Sale",
+  lifetimeAccess: true
+};
+
+// If a real sale end date is later established, set it here (ISO
+// string). While null, no urgency or countdown is shown — the app
+// never fabricates a deadline that doesn't exist.
+const SALE_END_DATE = null;
+
+/* ============================================================
+   SECTION: COACHING RECOMMENDATION ENGINE
+   Do not invent Cal.com event URLs — every category below falls
+   back to the general Kingdom Blueprint Legacy link until its
+   exact event URL is configured.
+============================================================ */
+const CAL_BOOKING_TYPES = {
+  businessStrategy: { label: "Business Strategy & Growth Coaching", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  recoveryLife: { label: "Recovery & Life Transformation Coaching", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  confidenceSelfImage: { label: "Confidence & Self-Image Coaching", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  careerGrowth: { label: "Career Growth Coaching", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  lifestyleRoutine: { label: "Lifestyle & Routine Coaching", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  relationshipAdvice: { label: "Dating & Relationship Guidance", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  messagingCommunication: { label: "Texting, Messaging & Communication", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  styleWardrobe: { label: "Style & Wardrobe Coaching", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  interiorDesign: { label: "Interior Design & Aesthetic Guidance", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  ventRealTalk: { label: "Vent / Real Talk Session", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  healthFitness: { label: "Health & Fitness Accountability", url: "ADD_EXACT_CAL_EVENT_LINK" },
+  generalStrategy: { label: "Kingdom Blueprint Strategy Session", url: "https://cal.com/kingdom-blueprint-legacy-qj14cj" }
+};
+function resolveCalUrl(key){
+  const entry = CAL_BOOKING_TYPES[key] || CAL_BOOKING_TYPES.generalStrategy;
+  if(!entry.url || entry.url === "ADD_EXACT_CAL_EVENT_LINK") return CAL_BOOKING_TYPES.generalStrategy.url;
+  return entry.url;
+}
+
+function recommendCoaching(ctx){
+  // Pattern-level, non-clinical recommendation based on assessment
+  // results only. Never presented as a definitive or clinical match.
+  const dims = {}; (ctx.rawDimScores || []).forEach(d => dims[d.key] = d.pct);
+  const lowestTwoKeys = ctx.growthPriorities.slice(0,2).map(g => g.key);
+
+  if(ctx.season.key === "restoration" || lowestTwoKeys.includes("recovery")){
+    return { key: "recoveryLife", why: "Your Blueprint Season and growth priorities point to rebuilding — energy, identity, or consistency — after a difficult stretch.", helps: "clarify what recovery and steady rebuilding could look like for you right now." };
+  }
+  if(lowestTwoKeys.includes("confidence") || ctx.blockerKey === "confidence"){
+    return { key: "confidenceSelfImage", why: "Confidence is one of your growth priorities, and your primary blocker relates to visible action or self-doubt.", helps: "build evidence and practice around trusting your own decisions." };
+  }
+  if(lowestTwoKeys.includes("structure") || lowestTwoKeys.includes("execution")){
+    return { key: "lifestyleRoutine", why: "Structure and execution stood out as growth priorities in your results.", helps: "build a rhythm and routine that actually fits your life." };
+  }
+  if(lowestTwoKeys.includes("support")){
+    return { key: "relationshipAdvice", why: "Support & Boundaries was one of your growth priorities.", helps: "strengthen the relationships and boundaries around your goals." };
+  }
+  return { key: "generalStrategy", why: "Your results touch on more than one area at once, so a general strategy session is the best starting point.", helps: "map interconnected goals across your life, work, or business into one focused plan." };
+}
+
+/* ============================================================
+   SECTION: PRIVACY-CONSCIOUS ANALYTICS (stub)
+   Replace with a real analytics provider server-side call if
+   desired. Never logs journal text or reflection answers.
+============================================================ */
+function trackEvent(name, props){
+  try{ console.log("[analytics]", name, props || {}); }catch(e){}
+}
+
+/* ============================================================
+   SECTION: ASSESSMENT DATA (unchanged from prior version)
+============================================================ */
+const DIMENSIONS = {
+  clarity: {
+    name: "Clarity",
+    lowMeaning: "You may be spending energy on multiple directions without a clear anchor, which can leave you feeling scattered about what's next.",
+    whyMatters: "Clarity is the foundation everything else builds on — without it, confidence, structure, and execution have nothing solid to aim at.",
+    action: "Write one sentence describing exactly what you want your next season to look like, and read it daily this week.",
+    strengthMeaning: "You have a strong sense of direction and know what matters most to you right now.",
+    leverage: "Use your clarity to anchor decisions in weaker areas — when structure or execution feels overwhelming, return to your stated direction to decide what to prioritize.",
+    blockerName: "Unclear Direction",
+    blockerExplanation: "When direction feels unclear, it's easy to feel stuck deciding what deserves your energy — not because you lack ability, but because you haven't yet named what you're building toward.",
+    blockerAppearance: "starting and stopping different pursuits, saying yes to too many directions at once, or feeling paralyzed when asked what you really want.",
+    blockerBelief: "\"I have to know everything before I take the first step.\" Try replacing it with: \"Clarity often comes through action, not before it.\"",
+    blockerAction: "Write down one direction you're willing to explore for the next 30 days, even without full certainty."
+  },
+  confidence: {
+    name: "Confidence",
+    lowMeaning: "Doubt or fear may be quietly keeping you from taking visible action, even when you already know what to do.",
+    whyMatters: "Confidence is what turns knowledge into movement — without it, even a clear plan can stay untouched.",
+    action: "Take one small, visible action this week that feels a little scary, even if it isn't perfect.",
+    strengthMeaning: "You're willing to act and make decisions even without full certainty.",
+    leverage: "Let your confidence carry you into the areas that feel less certain — you don't need complete clarity or a perfect structure to take the next honest step.",
+    blockerName: "Fear of Visible Action",
+    blockerExplanation: "Doubt can quietly keep meaningful action hidden — waiting for more readiness, more proof, or more certainty before moving.",
+    blockerAppearance: "overpreparing without acting, downplaying your own ability, or letting other people's opinions decide your next step.",
+    blockerBelief: "\"I need to feel ready before I act.\" Try replacing it with: \"Confidence is often built by the action, not required before it.\"",
+    blockerAction: "Take one small visible step toward your goal before you feel fully ready."
+  },
+  structure: {
+    name: "Structure",
+    lowMeaning: "Without consistent routines or systems, good intentions may not be translating into steady progress.",
+    whyMatters: "Structure is what carries you forward on the days motivation runs low.",
+    action: "Choose one simple routine you will practice at least three times this week.",
+    strengthMeaning: "You use routines, priorities, and systems well to stay consistent.",
+    leverage: "Apply your gift for structure to areas like execution or recovery — build a simple system that supports the parts of your life that feel less steady.",
+    blockerName: "Inconsistent Structure",
+    blockerExplanation: "Without steady routines or systems, momentum can rise and fall with motivation instead of moving forward reliably.",
+    blockerAppearance: "strong starts that fade, day-to-day life feeling reactive, or good intentions that rarely become repeated habits.",
+    blockerBelief: "\"I just need more motivation.\" Try replacing it with: \"Structure carries me on the days motivation doesn't show up.\"",
+    blockerAction: "Choose one simple, repeatable routine and practice it at least three times."
+  },
+  recovery: {
+    name: "Recovery & Resilience",
+    lowMeaning: "Past disappointment, grief, or burnout may still be affecting your energy and willingness to move forward.",
+    whyMatters: "Sustainable growth requires the ability to recover, not just push through — without it, setbacks can stall momentum for a long time.",
+    action: "Give yourself one intentional act of rest or care this week, without guilt.",
+    strengthMeaning: "You know how to care for yourself and recover well after hard seasons.",
+    leverage: "Let your resilience steady you as you take risks in other areas — you've recovered before, and that experience is evidence you can again.",
+    blockerName: "Unresolved Exhaustion",
+    blockerExplanation: "Carrying unprocessed disappointment, grief, or burnout can quietly limit your energy for what's next, even when your intentions are strong.",
+    blockerAppearance: "pushing through exhaustion, feeling numb or disconnected from your goals, or cycling between overworking and shutting down.",
+    blockerBelief: "\"I don't have time to rest.\" Try replacing it with: \"Rest is part of building, not a delay of it.\"",
+    blockerAction: "Schedule one specific block of rest or restoration this week, and protect it like an appointment."
+  },
+  support: {
+    name: "Support & Boundaries",
+    lowMeaning: "You may be carrying more alone than you need to, or struggling to protect your time and energy.",
+    whyMatters: "No meaningful growth happens in isolation — support and boundaries protect the energy you need to keep going.",
+    action: "Ask one person for one specific kind of help or encouragement this week.",
+    strengthMeaning: "You know how to ask for help and protect your time and energy.",
+    leverage: "Use your support network to strengthen weaker areas — invite someone into your goals around structure or execution so you're not carrying it alone.",
+    blockerName: "Weak Boundaries",
+    blockerExplanation: "Carrying too much alone, or struggling to protect your time and energy, can quietly drain the capacity you need for meaningful growth.",
+    blockerAppearance: "difficulty saying no, feeling responsible for everyone else's needs, or rarely asking for help even when it's needed.",
+    blockerBelief: "\"Needing help means I'm failing.\" Try replacing it with: \"Support is part of sustainable growth, not evidence I can't handle it.\"",
+    blockerAction: "Ask one person for one specific kind of help or support this week."
+  },
+  execution: {
+    name: "Execution",
+    lowMeaning: "Ideas and goals may be forming, but they aren't consistently turning into finished action.",
+    whyMatters: "Execution is where vision becomes reality — without it, even the clearest plans stay only plans.",
+    action: "Pick one unfinished goal and complete just its very next step this week.",
+    strengthMeaning: "You consistently turn ideas into finished, measurable action.",
+    leverage: "Use your follow-through to help stabilize other areas — attach a concrete next step to whatever feels unclear or overwhelming right now.",
+    blockerName: "Planning Without Execution",
+    blockerExplanation: "Ideas and plans may be forming well, but without consistent follow-through, they can stay just out of reach of becoming reality.",
+    blockerAppearance: "detailed planning that never turns into action, restarting the same goal repeatedly, or feeling busy without visible progress.",
+    blockerBelief: "\"I need the perfect plan before I start.\" Try replacing it with: \"A good enough plan, acted on, beats a perfect plan left untouched.\"",
+    blockerAction: "Choose one unfinished goal and complete just its very next step."
+  }
+};
+const DIMENSION_ORDER = ["clarity","confidence","structure","recovery","support","execution"];
+
+const SEASONS = {
+  foundation: { key: "foundation", name: "Foundation", desc: "Your responses suggest that you may currently be in a Foundation Season — building from the ground up, establishing clarity, stability, or basic systems before pursuing major expansion.", focus: "This season may be asking you to slow down long enough to get clear, build simple support structures, and strengthen your personal foundation before adding more." },
+  restoration: { key: "restoration", name: "Restoration", desc: "Your responses suggest that you may currently be in a Restoration Season — rebuilding confidence, energy, identity, or consistency after a difficult season, disappointment, or transition.", focus: "This season may be asking you to prioritize rest, healing, and self-compassion before pushing toward the next big step." },
+  growth: { key: "growth", name: "Growth", desc: "Your responses suggest that you may currently be in a Growth Season — you have some clarity and momentum already, and you're being invited to strengthen the habits, discipline, and visibility that will carry you further.", focus: "This season may be asking you to build consistency — turning what you already know into steady, repeated action." },
+  refinement: { key: "refinement", name: "Refinement", desc: "Your responses suggest that you may currently be in a Refinement Season — you're already progressing, and this season may be less about doing more and more about simplifying, optimizing, and aligning what you're already building.", focus: "This season may be asking you to strengthen boundaries, remove what isn't working, and sharpen your focus." },
+  leadership: { key: "leadership", name: "Leadership", desc: "Your responses suggest that you may currently be in a Leadership Season — appearing ready to increase your responsibility, influence, or decision-making in your career, business, family, or community.", focus: "This season may be asking you to step more fully into visibility and lead from what you've already built." },
+  legacy: { key: "legacy", name: "Legacy", desc: "Your responses suggest that you may currently be in a Legacy Season — focused on sustainability, contribution, mentorship, and building something that can outlive your direct involvement.", focus: "This season may be asking you to invest in mentoring others and building systems that can carry on without you." }
+};
+
+const QUESTIONS_SCORED = [
+  { dim: "clarity", text: "I have a clear sense of what I want my next season to look like." },
+  { dim: "clarity", text: "I know what matters most to me right now, even when things get noisy." },
+  { dim: "clarity", text: "I can clearly explain the direction I want to move toward." },
+  { dim: "clarity", text: "I rarely feel confused about what my next right step should be." },
+  { dim: "confidence", text: "I trust myself to make decisions, even without complete certainty." },
+  { dim: "confidence", text: "I take visible action on my goals, even when I feel afraid." },
+  { dim: "confidence", text: "I keep moving forward even when I doubt myself." },
+  { dim: "confidence", text: "I speak up for what I want instead of staying silent." },
+  { dim: "structure", text: "I have routines that support my goals on a regular basis." },
+  { dim: "structure", text: "I prioritize my time around what matters most." },
+  { dim: "structure", text: "I follow through on plans I make for myself." },
+  { dim: "structure", text: "I have systems in place to track my progress." },
+  { dim: "recovery", text: "I know how to care for myself after disappointment or setbacks." },
+  { dim: "recovery", text: "I have recovered well from a difficult season in my life." },
+  { dim: "recovery", text: "I can identify when I am burned out and respond to it." },
+  { dim: "recovery", text: "I give myself grace during hard transitions instead of shutting down." },
+  { dim: "support", text: "I ask for help when I need it." },
+  { dim: "support", text: "I protect my time and energy from things that drain me." },
+  { dim: "support", text: "I can say no without excessive guilt." },
+  { dim: "support", text: "I have people in my life who genuinely support my growth." },
+  { dim: "execution", text: "I turn my ideas into concrete action steps." },
+  { dim: "execution", text: "I finish what I start, even when it gets hard." },
+  { dim: "execution", text: "I set measurable goals and track them." },
+  { dim: "execution", text: "I follow through on commitments I make to myself." }
+];
+
+const REFLECTIONS = [
+  { key: "change90", text: "What do you most want to change in the next 90 days?" },
+  { key: "heldBack", text: "What do you believe has kept you from making this change?" },
+  { key: "release", text: "What responsibility, habit, fear, or expectation are you ready to release?" },
+  { key: "overlooked", text: "What strength have you overlooked in yourself?" },
+  { key: "promise", text: "What promise are you willing to make to yourself during this next season?" }
+];
+
+const SCALE_LABELS = ["Rarely true", "Occasionally true", "Sometimes true", "Usually true", "Consistently true"];
+
+const ITEMS = QUESTIONS_SCORED.map(q => ({ type: "scored", ...q }))
+  .concat(REFLECTIONS.map(r => ({ type: "reflection", ...r })));
+
+const STORAGE_KEY = "kbl_blueprint_code_progress_v2";
+const ASSESSMENT_RESULTS_KEY = "kbl_assessment_results_v1";
+
+/* ============================================================
+   SECTION: ASSESSMENT STATE
+============================================================ */
+let current = 0;
+let answers = new Array(ITEMS.length).fill(null);
+let userName = "";
+
+document.getElementById("year").textContent = new Date().getFullYear();
+
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = loadProgress();
+  if (saved && saved.answers && saved.answers.some(a => a !== null && a !== "") && !saved.completed) {
+    document.getElementById("resumeBanner").style.display = "flex";
+  }
+  if (saved && saved.userName) {
+    document.getElementById("nameInput").value = saved.userName;
+  }
+  initFontScale();
+  document.getElementById("supportEmailDisplay").textContent = SUPPORT_EMAIL;
+  renderSaleEndNote();
+  initializeAuth();
+  initializePaidJourney();
+
+  // Handle a return from Stripe. Two paths:
+  // 1. Supabase configured -> real server verification (unchanged).
+  // 2. Supabase NOT configured -> interim direct-Payment-Link path,
+  //    clearly flagged as unverified. See handleDirectPaymentReturn().
+  const params = new URLSearchParams(window.location.search);
+  if(params.get("payment") === "success"){
+    showScreen("screen-purchase-success");
+    if(isSupabaseConfigured()){
+      checkVerifiedProductAccess(false);
+    } else {
+      handleDirectPaymentReturn();
+    }
+  }
+});
+
+function handleDirectPaymentReturn(){
+  let cameFromDirectCheckout = false;
+  try{ cameFromDirectCheckout = localStorage.getItem("kbl_pending_direct_checkout") === "1"; }catch(e){}
+
+  const heading = document.getElementById("purchaseSuccessHeading");
+  const msg = document.getElementById("purchaseSuccessMessage");
+
+  // ⚠️ IMPORTANT, READ THIS: Supabase/Stripe server-side verification
+  // is not configured yet, so there is NO way to cryptographically
+  // confirm this visitor actually paid. Anyone who knows the URL
+  // pattern could add ?payment=success and get unlocked for free.
+  // This interim unlock exists only so real, paying customers aren't
+  // blocked while the secure backend is being set up — treat it as
+  // temporary, and set up Supabase + the Edge Functions (see
+  // SETUP.md) as soon as possible to close this gap.
+  if(cameFromDirectCheckout){
+    try{ localStorage.removeItem("kbl_pending_direct_checkout"); }catch(e){}
+    paidAccessGranted = true;
+    try{ localStorage.setItem(PAID_ACCESS_CACHE_KEY, JSON.stringify({ hasAccess: true, verified: false, checkedAt: new Date().toISOString() })); }catch(e){}
+    if(!loadPaidJourneyProgress()){ initJourneyState(); }
+    document.getElementById("dashboardEntryBanner").style.display = "flex";
+    renderPath2Card();
+    if(heading) heading.textContent = "Thank you for your purchase!";
+    if(msg) msg.textContent = "Your journey has been unlocked on this device. (Note: purchase verification isn't fully automated yet — see below.)";
+  } else if(heading && msg){
+    heading.textContent = "Payment received";
+    msg.textContent = "If you completed a purchase, please refresh verification, or contact support if access doesn't appear.";
+  }
+}
+
+function renderSaleEndNote(){
+  const el = document.getElementById("saleEndNote");
+  if(!el) return;
+  // No countdown or urgency is shown unless a real SALE_END_DATE is set.
+  el.textContent = SALE_END_DATE ? `Launch sale pricing ends ${new Date(SALE_END_DATE).toLocaleDateString()}.` : "";
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function startAssessment(){
+  userName = document.getElementById("nameInput").value.trim();
+  current = 0;
+  answers = new Array(ITEMS.length).fill(null);
+  showScreen("screen-quiz");
+  renderQuestion();
+}
+
+function resumeProgress(){
+  const saved = loadProgress();
+  if(!saved) return startAssessment();
+  answers = saved.answers;
+  current = saved.current || 0;
+  userName = saved.userName || "";
+  showScreen("screen-quiz");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const item = ITEMS[current];
+  const isScored = item.type === "scored";
+
+  document.getElementById("q-category").textContent = isScored ? DIMENSIONS[item.dim].name : "Reflection";
+  document.getElementById("q-text").textContent = item.text;
+
+  document.getElementById("scoredWrap").style.display = isScored ? "block" : "none";
+  document.getElementById("reflectWrap").style.display = isScored ? "none" : "block";
+
+  document.getElementById("progressFill").style.width = ((current / ITEMS.length) * 100) + "%";
+  document.getElementById("progressText").textContent = `Question ${current+1} of ${ITEMS.length}`;
+  document.getElementById("progressPercent").textContent = Math.round(((current+1)/ITEMS.length)*100) + "%";
+
+  if(isScored){
+    const row = document.getElementById("scaleRow");
+    row.innerHTML = "";
+    for(let i=1;i<=5;i++){
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "scale-btn" + (answers[current] === i ? " selected" : "");
+      btn.innerHTML = `<span class="num">${i}</span><span class="lbl">${SCALE_LABELS[i-1]}</span>`;
+      btn.onclick = () => selectScale(i);
+      row.appendChild(btn);
+    }
+  } else {
+    const ta = document.getElementById("reflectInput");
+    ta.value = (typeof answers[current] === "string") ? answers[current] : "";
+    ta.oninput = () => { answers[current] = ta.value; saveProgress(false); };
+  }
+
+  document.getElementById("backBtn").disabled = (current === 0);
+  document.getElementById("backBtn").style.visibility = (current === 0) ? "hidden" : "visible";
+
+  const nextBtn = document.getElementById("nextBtn");
+  nextBtn.disabled = isScored ? (answers[current] === null) : false;
+  nextBtn.textContent = (current === ITEMS.length - 1) ? "See My Results" : "Next";
+
+  saveProgress(false);
+}
+
+function selectScale(value){ answers[current] = value; renderQuestion(); }
+
+function goNext(){
+  const item = ITEMS[current];
+  if(item.type === "scored" && answers[current] === null) return;
+  if(item.type === "reflection"){
+    const ta = document.getElementById("reflectInput");
+    if(ta) answers[current] = ta.value;
+  }
+  if(current < ITEMS.length - 1){ current++; renderQuestion(); }
+  else { finishAssessment(); }
+}
+
+function goBack(){
+  if(current === 0) return;
+  const item = ITEMS[current];
+  if(item.type === "reflection"){
+    const ta = document.getElementById("reflectInput");
+    if(ta) answers[current] = ta.value;
+  }
+  current--; renderQuestion();
+}
+
+function saveAndExit(){
+  const item = ITEMS[current];
+  if(item.type === "reflection"){
+    const ta = document.getElementById("reflectInput");
+    if(ta) answers[current] = ta.value;
+  }
+  saveProgress(false);
+  showScreen("screen-welcome");
+  document.getElementById("resumeBanner").style.display = "flex";
+}
+
+/* ============================================================
+   SECTION: SCORING
+============================================================ */
+function computeDimensionScores(){
+  const scores = {}; const counts = {};
+  DIMENSION_ORDER.forEach(k => { scores[k] = 0; counts[k] = 0; });
+  QUESTIONS_SCORED.forEach((q, i) => { scores[q.dim] += (answers[i] || 0); counts[q.dim] += 1; });
+  return DIMENSION_ORDER.map(k => ({
+    key: k, name: DIMENSIONS[k].name, score: scores[k], max: counts[k] * 5,
+    pct: Math.round((scores[k] / (counts[k] * 5)) * 100)
+  }));
+}
+
+function getReflectionAnswer(key){
+  const idx = QUESTIONS_SCORED.length + REFLECTIONS.findIndex(r => r.key === key);
+  const val = answers[idx];
+  return (typeof val === "string" && val.trim().length > 0) ? val.trim() : "";
+}
+
+function determineSeason(dimScores, overallPct){
+  const byKey = {}; dimScores.forEach(d => byKey[d.key] = d);
+  const lowestDim = [...dimScores].sort((a,b) => a.pct - b.pct)[0];
+  const recoveryPct = byKey.recovery.pct;
+  if (recoveryPct <= 45 && lowestDim.key === "recovery") return SEASONS.restoration;
+  if (overallPct < 45) return SEASONS.foundation;
+  if (overallPct < 65) return SEASONS.growth;
+  if (overallPct < 82) return SEASONS.refinement;
+  if (overallPct < 93) return SEASONS.leadership;
+  return SEASONS.legacy;
+}
+
+function readinessInterpretation(pct){
+  if(pct < 40) return "Right now, you may be earlier in your readiness journey than you'd like — and that's simply useful information, not a verdict. Readiness is something you build, one honest step at a time.";
+  if(pct < 60) return "You have real pieces in place, with a few key areas still developing. Strengthening those areas could meaningfully shift your momentum.";
+  if(pct < 80) return "You're carrying solid readiness into this season, with a handful of specific areas that could use more attention.";
+  return "You appear well-resourced and ready to move forward with intention in this season.";
+}
+
+/* ============================================================
+   SECTION: ASSESSMENT RESULTS RENDERING + PERSISTENCE
+============================================================ */
+function finishAssessment(){
+  saveProgress(true);
+  renderResults();
+  showScreen("screen-results");
+  trackEvent("assessment_completed", {});
+}
+
+function saveAssessmentResults(dimScores, overallPct, season, growthPriorities, strengths, blockerKey, displayName){
+  const reflections = {};
+  REFLECTIONS.forEach(r => { reflections[r.key] = getReflectionAnswer(r.key); });
+  const data = {
+    userName: displayName, seasonKey: season.key, overallPct, dimScores,
+    growthPriorities: growthPriorities.map(d => ({ key:d.key, name:d.name, score:d.score, max:d.max, pct:d.pct })),
+    strengths: strengths.map(d => ({ key:d.key, name:d.name, score:d.score, max:d.max, pct:d.pct })),
+    blockerKey, reflections, savedAt: new Date().toISOString()
+  };
+  try{ localStorage.setItem(ASSESSMENT_RESULTS_KEY, JSON.stringify(data)); }catch(e){ console.warn("Could not save assessment results:", e); }
+}
+
+function loadAssessmentResults(){
+  try{ const raw = localStorage.getItem(ASSESSMENT_RESULTS_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+
+function renderResults(){
+  const dimScores = computeDimensionScores();
+  const totalScore = dimScores.reduce((s,d) => s + d.score, 0);
+  const maxScore = dimScores.reduce((s,d) => s + d.max, 0);
+  const overallPct = Math.round((totalScore / maxScore) * 100);
+
+  const ascending = [...dimScores].sort((a,b) => a.pct - b.pct);
+  const descending = [...dimScores].sort((a,b) => b.pct - a.pct);
+  const growthPriorities = ascending.slice(0,3);
+  const strengths = descending.slice(0,3);
+  const lowestDim = ascending[0];
+
+  const season = determineSeason(dimScores, overallPct);
+  const displayName = userName ? userName : "Friend";
+
+  document.getElementById("personalGreeting").textContent = `${displayName}, here is your personalized Blueprint Code™ report.`;
+  document.getElementById("seasonName").textContent = season.name;
+  document.getElementById("seasonDesc").textContent = season.desc;
+  document.getElementById("seasonFocus").textContent = season.focus;
+  document.getElementById("readinessPct").textContent = overallPct + "%";
+  document.getElementById("readinessFill").style.width = overallPct + "%";
+  document.getElementById("readinessInterp").textContent = `${displayName}, ` + readinessInterpretation(overallPct);
+
+  const priorityWrap = document.getElementById("priorityList");
+  priorityWrap.innerHTML = "";
+  growthPriorities.forEach(d => {
+    const meta = DIMENSIONS[d.key];
+    const card = document.createElement("div");
+    card.className = "priority-card";
+    card.innerHTML = `<span class="score-tag">Score ${d.score}/${d.max} &middot; ${d.pct}%</span>
+      <h4>${meta.name}</h4><p>${meta.lowMeaning}</p>
+      <p><strong>Why it matters:</strong> ${meta.whyMatters}</p>
+      <p class="action-line">This week: ${meta.action}</p>`;
+    priorityWrap.appendChild(card);
+  });
+
+  const strengthWrap = document.getElementById("strengthListWrap");
+  strengthWrap.innerHTML = "";
+  strengths.forEach(d => {
+    const meta = DIMENSIONS[d.key];
+    const card = document.createElement("div");
+    card.className = "strength-card";
+    card.innerHTML = `<span class="score-tag">Score ${d.score}/${d.max} &middot; ${d.pct}%</span>
+      <h4>${meta.name}</h4><p>${meta.strengthMeaning}</p>
+      <p class="action-line">${meta.leverage}</p>`;
+    strengthWrap.appendChild(card);
+  });
+
+  const blockerMeta = DIMENSIONS[lowestDim.key];
+  document.getElementById("blockerName").textContent = blockerMeta.blockerName;
+  document.getElementById("blockerAppearance").textContent = blockerMeta.blockerAppearance;
+  document.getElementById("blockerExplanation").textContent = blockerMeta.blockerExplanation;
+  document.getElementById("blockerBelief").textContent = blockerMeta.blockerBelief;
+  document.getElementById("blockerAction").textContent = blockerMeta.blockerAction;
+
+  renderPlan(displayName, growthPriorities, strengths);
+
+  const shareText = `I completed The Blueprint Code™ and discovered that I am in a ${season.name} Season. My strongest foundation is ${strengths[0].name}, and my next priority is ${growthPriorities[0].name}. I am building my next chapter one intentional step at a time.\n\n#TheBlueprintCode #KingdomBlueprintLegacy`;
+  document.getElementById("shareText").value = shareText;
+  document.getElementById("copyStatus").textContent = "";
+
+  saveAssessmentResults(dimScores, overallPct, season, growthPriorities, strengths, lowestDim.key, displayName);
+  renderPath2Card();
+}
+
+function renderPlan(displayName, growthPriorities, strengths){
+  const changeGoal = getReflectionAnswer("change90");
+  const p1 = document.getElementById("phase1List");
+  const p2 = document.getElementById("phase2List");
+  const p3 = document.getElementById("phase3List");
+  const reflectionLine = changeGoal
+    ? `Revisit your stated focus — "${changeGoal}" — for a few minutes each week, and write what a clearer version of it would look like.`
+    : `Spend a few minutes each week naming, in one sentence, what you most want your next season to look like.`;
+  p1.innerHTML = `
+    <li><strong>Reflection goal:</strong> ${reflectionLine}</li>
+    <li><strong>Routine or system:</strong> Build one simple weekly routine that directly supports your top growth priority: ${growthPriorities[0].name}.</li>
+    <li><strong>Boundary or support action:</strong> Identify one person you can be honest with about this season, and one boundary you will set to protect your time or energy.</li>
+    <li><strong>Measurable milestone:</strong> By day 30, ${displayName}, you will have named your direction in one sentence and shared it with at least one trusted person.</li>`;
+  p2.innerHTML = `
+    <li><strong>Confidence-building action:</strong> Take one visible action tied to your goal that feels a little uncomfortable, before day 45.</li>
+    <li><strong>Execution goal:</strong> Break your goal connected to ${(growthPriorities[1] ? growthPriorities[1].name : growthPriorities[0].name)} into three concrete steps, and complete the first.</li>
+    <li><strong>Accountability action:</strong> Set up a recurring check-in with someone who will genuinely ask how it's going.</li>
+    <li><strong>Measurable milestone:</strong> By day 60, you will have completed at least three concrete steps toward your goal.</li>`;
+  p3.innerHTML = `
+    <li><strong>Visible action:</strong> Share your progress with a wider circle in a way that reflects your growth.</li>
+    <li><strong>Optimization step:</strong> Review what's working and simplify or remove one thing that isn't serving this season.</li>
+    <li><strong>Leadership or legacy action:</strong> Offer what you've learned to one other person, using your strength in ${strengths[0].name} to support them.</li>
+    <li><strong>Measurable milestone:</strong> By day 90, you will have a repeatable rhythm in place and one clear next goal for the season ahead.</li>`;
+}
+
+function copyShareText(){
+  const ta = document.getElementById("shareText");
+  ta.select(); ta.setSelectionRange(0, 99999);
+  const statusEl = document.getElementById("copyStatus");
+  copyToClipboardGeneric(ta.value, statusEl);
+}
+
+function copyToClipboardGeneric(text, statusEl){
+  const done = () => { if(statusEl){ statusEl.textContent = "Copied!"; setTimeout(() => statusEl.textContent = "", 2500); } };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => { document.execCommand("copy"); done(); });
+  } else { document.execCommand("copy"); done(); }
+}
+
+function retakeAssessment(){
+  clearProgress(false);
+  document.getElementById("nameInput").value = "";
+  startAssessment();
+}
+
+function saveProgress(completed){
+  try{
+    const data = { current, answers, userName, completed: !!completed, savedAt: new Date().toISOString() };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }catch(e){ console.warn("Could not save progress:", e); }
+}
+function loadProgress(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+function clearProgress(hideBanner){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  if(hideBanner) document.getElementById("resumeBanner").style.display = "none";
+}
+
+/* ============================================================
+   SECTION: ACCESS VERIFICATION (Supabase + Stripe backed)
+   PRODUCTION NOTE: `paidAccessGranted` is only ever set to true
+   here after a successful response from the verify-product-access
+   Edge Function (or, for local development only, when
+   DEVELOPMENT_PREVIEW_MODE is true). It is never set from a
+   `?payment=success` URL parameter alone — that parameter only
+   routes the user to the "verifying" screen, which then calls the
+   real backend check. The cached flag in localStorage exists only
+   to avoid a network round-trip on every screen change; it is
+   always re-validated against the server before anything sensitive
+   is unlocked.
+============================================================ */
+const PAID_ACCESS_CACHE_KEY = "kbl_paid_access_cache_v1"; // cache only, never authoritative
+let paidAccessGranted = false;
+let currentAuthUser = null;
+
+async function initializeAuth(){
+  const client = getSupabaseClient();
+  if(!client) return; // Supabase not configured yet — auth features are inert until SETUP.md is completed
+  const { data } = await client.auth.getSession();
+  currentAuthUser = data?.session?.user || null;
+  client.auth.onAuthStateChange((_event, session) => {
+    currentAuthUser = session?.user || null;
+  });
+}
+
+function initializePaidJourney(){
+  // Fast, non-authoritative UI hint from cache while we verify for real.
+  try{
+    const cached = JSON.parse(localStorage.getItem(PAID_ACCESS_CACHE_KEY) || "null");
+    paidAccessGranted = !!(cached && cached.hasAccess);
+  }catch(e){ paidAccessGranted = false; }
+
+  if(DEVELOPMENT_PREVIEW_MODE){
+    paidAccessGranted = true; // developer preview only, never in production
+  }
+
+  document.getElementById("dashboardEntryBanner").style.display = paidAccessGranted ? "flex" : "none";
+  document.getElementById("devPreviewRow").style.display = DEVELOPMENT_PREVIEW_MODE ? "flex" : "none";
+  renderPath2Card();
+  renderOfferAssessmentPreview();
+  renderOfferBenefitsList();
+
+  // Kick off a real server check in the background if configured.
+  if(isSupabaseConfigured() && !DEVELOPMENT_PREVIEW_MODE){
+    checkVerifiedProductAccess(false);
+  }
+}
+
+// verify-product-access: the ONLY source of truth for unlocking
+// paid content in production.
+async function checkVerifiedProductAccess(showAlerts){
+  if(DEVELOPMENT_PREVIEW_MODE){
+    paidAccessGranted = true;
+    renderPath2Card();
+    return true;
+  }
+  const client = getSupabaseClient();
+  if(!client){
+    if(showAlerts) alert("Supabase is not configured yet (see SETUP.md). Access cannot be verified in this environment.");
+    return false;
+  }
+  const { data: sessionData } = await client.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if(!token){
+    paidAccessGranted = false;
+    renderPath2Card();
+    return false;
+  }
+  try{
+    const { data, error } = await client.functions.invoke("verify-product-access", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if(error) throw error;
+    paidAccessGranted = !!(data && data.hasAccess);
+    try{ localStorage.setItem(PAID_ACCESS_CACHE_KEY, JSON.stringify({ hasAccess: paidAccessGranted, checkedAt: new Date().toISOString() })); }catch(e){}
+
+    if(paidAccessGranted){
+      trackEvent("purchase_verified", {});
+      if(!loadPaidJourneyProgress()){ initJourneyState(); }
+      const heading = document.getElementById("purchaseSuccessHeading");
+      const msg = document.getElementById("purchaseSuccessMessage");
+      if(heading){ heading.textContent = "Your lifetime access is active."; }
+      if(msg){ msg.textContent = "Welcome in — your personalized 90-day journey is ready."; }
+    } else if(document.getElementById("screen-purchase-success").classList.contains("active")){
+      document.getElementById("purchaseSuccessMessage").textContent = "Your payment was received and is still being verified. Refresh in a moment or contact support. Do not purchase again.";
+    }
+    document.getElementById("dashboardEntryBanner").style.display = paidAccessGranted ? "flex" : "none";
+    renderPath2Card();
+    return paidAccessGranted;
+  }catch(e){
+    console.warn("verify-product-access failed:", e);
+    if(showAlerts) alert("We couldn't verify your access right now. Please try again shortly.");
+    return false;
+  }
+}
+
+function renderPath2Card(){
+  const row = document.getElementById("path2ButtonRow");
+  if(!row) return;
+  row.innerHTML = "";
+  const btn = document.createElement("a");
+  btn.className = "btn btn-gold";
+  if(paidAccessGranted){
+    btn.textContent = "Continue My 90-Day Journey";
+    btn.href = "javascript:void(0)";
+    btn.onclick = () => goToDashboard();
+  } else {
+    btn.textContent = "Unlock My 90-Day Journey — $27";
+    btn.href = "javascript:void(0)";
+    btn.onclick = () => handleUnlockClick();
+  }
+  row.appendChild(btn);
+}
+
+function handleUnlockClick(){
+  trackEvent("offer_viewed", {});
+  if(paidAccessGranted){ goToDashboard(); return; }
+
+  if(!isSupabaseConfigured()){
+    // INTERIM PATH: no Supabase project configured yet, so we send
+    // the customer straight to the real Stripe Payment Link instead
+    // of the secure Edge-Function-based checkout. See the warning
+    // in handlePaymentReturn() about what this means for access
+    // verification until Supabase is set up.
+    if(DIRECT_STRIPE_PAYMENT_LINK && !DIRECT_STRIPE_PAYMENT_LINK.startsWith("ADD_")){
+      trackEvent("checkout_started", { mode: "direct_payment_link" });
+      try{ localStorage.setItem("kbl_pending_direct_checkout", "1"); }catch(e){}
+      window.location.href = DIRECT_STRIPE_PAYMENT_LINK;
+    } else {
+      alert("Secure checkout is being connected. Please contact Kingdom Blueprint Legacy or return soon to complete your purchase.");
+    }
+    return;
+  }
+
+  if(!currentAuthUser){
+    showScreen("screen-auth");
+    showAuthMode("signup");
+    return;
+  }
+  createSecureCheckout();
+}
+
+async function createSecureCheckout(){
+  trackEvent("checkout_started", {});
+  const client = getSupabaseClient();
+  if(!client){
+    alert("Secure checkout is being connected. Please contact Kingdom Blueprint Legacy or return soon to complete your purchase.");
+    return;
+  }
+  const { data: sessionData } = await client.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if(!token){
+    showScreen("screen-auth");
+    showAuthMode("signin");
+    return;
+  }
+  try{
+    const { data, error } = await client.functions.invoke("create-checkout-session", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if(error) throw error;
+    if(data && data.url){
+      window.location.href = data.url; // Stripe-hosted Checkout page
+    } else if(data && data.error){
+      alert(data.error);
+    } else {
+      alert("Secure checkout is being connected. Please contact Kingdom Blueprint Legacy or return soon to complete your purchase.");
+    }
+  }catch(e){
+    console.warn("createSecureCheckout failed:", e);
+    alert("We couldn't start checkout right now. Please try again shortly.");
+  }
+}
+
+function devUnlockPreview(){
+  paidAccessGranted = true;
+  if(!loadPaidJourneyProgress()){ initJourneyState(); }
+  goToDashboard();
+}
+
+/* ---- Offer screen personalization ---- */
+function renderOfferAssessmentPreview(){
+  const el = document.getElementById("offerAssessmentPreview");
+  if(!el) return;
+  const ctx = getCtx();
+  el.innerHTML = `<p><strong>${ctx.name}</strong>, your assessment placed you in a <strong>${ctx.season.name} Season</strong>, with <strong>${ctx.growthPriorities[0].name}</strong> as your top growth priority and <strong>${ctx.strengths[0].name}</strong> as a core strength to lean on.</p>`;
+}
+const OFFER_BENEFITS = [
+  ["Personalized Blueprint Report", "A detailed interpretation of your season, readiness, strengths, priorities, blocker, and 90-day focus."],
+  ["Personalized 12-Week Learning Journey", "Lessons and activities selected from your assessment results, not a one-size-fits-all curriculum."],
+  ["Ninety Days of Guided Action", "Daily activities designed to take approximately 5–15 minutes."],
+  ["Interactive Weekly Modules", "Twelve modules covering clarity, confidence, structure, recovery, boundaries, execution, visibility, leadership, and legacy."],
+  ["Personal Progress Dashboard", "Track your current phase, completion percentage, modules, daily actions, check-ins, and milestones."],
+  ["Private Digital Journal", "Save reflections, edit entries, review past insights, and export your own entries."],
+  ["Weekly Personal Check-Ins", "Measure self-reported progress in clarity, confidence, structure, energy, support, and execution."],
+  ["Printable Resources", "Assessment report, 90-day plan, weekly planner, daily action sheet, boundary builder, support map, goal worksheet, and more."],
+  ["Milestone Share Cards", "Share achievements without revealing private assessment results."],
+  ["Completion Certificate", "A personal-development completion certificate after your 90-day journey."],
+  ["Lifetime Access", "Return to the product and repeat or review the program through your account."],
+  ["Preferred Coaching Pathway", "The system recommends the coaching service most aligned with your results, when you want more support."],
+  ["Future Included Product Improvements", "Your purchase includes access to future improvements made to this specific digital product while it remains supported by Kingdom Blueprint Legacy."],
+  ["No Subscription", "You pay once rather than receiving recurring charges."],
+  ["Personal-Use Downloads", "Download and print your own reports and worksheets."]
+];
+function renderOfferBenefitsList(){
+  const el = document.getElementById("offerBenefitsList");
+  if(!el) return;
+  el.innerHTML = OFFER_BENEFITS.map((b,i) => `<div class="benefit-item"><span class="num">${i+1}</span><div><strong>${b[0]}</strong><p>${b[1]}</p></div></div>`).join("");
+}
+
+/* ============================================================
+   SECTION: PAID JOURNEY STATE + PERSISTENCE
+============================================================ */
+const JOURNEY_KEY = "kbl_paid_journey_v1";
+const JOURNAL_KEY = "kbl_paid_journal_v1";
+
+let journeyState = null;
+
+function initJourneyState(){
+  journeyState = {
+    currentDay: 1,
+    viewDay: 1,
+    currentWeek: 1,
+    viewWeek: 1,
+    completedWeeks: {},
+    dailyCompletion: {},
+    dailyNotes: {},
+    checkins: {},
+    onboardingDismissed: false,
+    startedAt: new Date().toISOString()
+  };
+  savePaidJourneyProgress();
+  trackEvent("journey_started", {});
+}
+
+function savePaidJourneyProgress(){
+  try{ localStorage.setItem(JOURNEY_KEY, JSON.stringify(journeyState)); }
+  catch(e){ console.warn("Could not save journey progress:", e); }
+}
+
+function loadPaidJourneyProgress(){
+  try{
+    const raw = localStorage.getItem(JOURNEY_KEY);
+    if(!raw) return null;
+    journeyState = JSON.parse(raw);
+    return journeyState;
+  }catch(e){ return null; }
+}
+
+// Exact-named wrappers required by spec (kept alongside the more
+// descriptive internal names used elsewhere in this file, so both
+// naming conventions work identically).
+function loadPaidJourney(){ return loadPaidJourneyProgress() || (initJourneyState(), journeyState); }
+function saveJourneyProgress(){ return savePaidJourneyProgress(); }
+function loadJourneyProgress(){ return loadPaidJourneyProgress(); }
+
+function resetPaidJourneyProgress(){
+  if(!confirm("This will reset all journey progress, check-ins, and daily activity (journal entries are kept separately). Continue?")) return;
+  try{ localStorage.removeItem(JOURNEY_KEY); }catch(e){}
+  initJourneyState();
+  goToDashboard();
+}
+
+function exportPaidJourneyReport(){
+  const res = loadAssessmentResults() || {};
+  const name = res.userName || "Friend";
+  const completedCount = Object.keys(journeyState.completedWeeks || {}).filter(k => journeyState.completedWeeks[k]).length;
+  const dailyCount = Object.keys(journeyState.dailyCompletion || {}).filter(k => journeyState.dailyCompletion[k]).length;
+  let text = `THE BLUEPRINT CODE™ — 90-DAY JOURNEY PROGRESS REPORT\n`;
+  text += `Kingdom Blueprint Legacy\n\n`;
+  text += `Name: ${name}\n`;
+  text += `Blueprint Season: ${res.seasonKey ? SEASONS[res.seasonKey].name : "N/A"}\n`;
+  text += `Overall Readiness: ${res.overallPct || 0}%\n`;
+  text += `Weeks completed: ${completedCount} of 12\n`;
+  text += `Daily actions completed: ${dailyCount} of 90\n`;
+  text += `Report generated: ${new Date().toLocaleDateString()}\n`;
+  downloadTextFile("blueprint-code-progress-report.txt", text);
+}
+
+function downloadTextFile(filename, text){
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   SECTION: WEEKLY MODULE CONTENT MAPS
+============================================================ */
+const WEEK_MODULES = [
+  { weekNum:1, phase:1, title:"Understanding Your Blueprint Season",
+    exercises:["Reflection Exercise: What This Season Is (and Isn't)"],
+    render(ctx){ return `
+      <p>${ctx.name}, your responses suggest you are currently in a <strong>${ctx.season.name} Season</strong>. ${ctx.season.desc}</p>
+      <p><strong>What this season may be asking of you:</strong> ${ctx.season.focus}</p>
+      <p><strong>What this season does not mean:</strong> Being in a ${ctx.season.name} Season is not a judgment on your worth, intelligence, or faith — it's simply an honest description of where you are right now, and seasons change through action, support, reflection, and growth.</p>
+      <p><strong>Strengths available to you in this season:</strong> Your strongest area right now is ${ctx.strengths[0].name} — ${ctx.strengths[0].meta.strengthMeaning}</p>
+      <p><strong>Common distractions in this season:</strong> comparing your pace to someone else's, trying to skip ahead to a later season, or measuring progress only by outward results.</p>`;
+    },
+    journalPrompt(ctx){ return `What does it feel like to name your current season as "${ctx.season.name}" out loud?`; },
+    action(ctx){ return `Write one sentence describing what ${ctx.season.name} Season looks like for you right now, and read it once a day this week.`; }
+  },
+  { weekNum:2, phase:1, title:"Naming What Matters",
+    exercises:["Values Clarification", "Priority Sorting Activity", "Life-Area Assessment", "\"What deserves my attention now?\" Exercise", "Three Goals vs. One Primary Goal", "My 90-Day Focus Statement"],
+    render(ctx){ return `
+      <p>${ctx.name}, before you build momentum, it helps to name what actually matters most right now — not everything you could work on, but the one thing that deserves your primary attention.</p>
+      <p>You told us you most want to change: <strong>${ctx.reflections.change90 || "a next-season direction you're still clarifying"}</strong>. Let that be the filter for this week's exercises below.</p>`;
+    },
+    journalPrompt(ctx){ return `If you could only make real progress on one thing in the next 90 days, what would it be — and why does it matter more than the others?`; },
+    action(ctx){ return `Write a single "90-Day Focus Statement" — one sentence naming the one goal you are prioritizing above all others.`; }
+  },
+  { weekNum:3, phase:1, title:"Recognizing the Blocker",
+    exercises:["Trigger-Identification Worksheet", "Thought-Pattern Reflection", "Evidence vs. Assumption Exercise"],
+    render(ctx){ return `
+      <p>${ctx.name}, your assessment points to <strong>${ctx.blocker.blockerName}</strong> as a primary pattern that may be limiting your progress right now.</p>
+      <p>${ctx.blocker.blockerExplanation}</p>
+      <p><strong>How it may show up</strong> in decisions, habits, work, or relationships: ${ctx.blocker.blockerAppearance}</p>
+      <p><strong>A belief to challenge:</strong> ${ctx.blocker.blockerBelief}</p>
+      <p>This is offered as a pattern to notice, not a diagnosis of who you are.</p>`;
+    },
+    journalPrompt(ctx){ return `When has ${ctx.blocker.blockerName.toLowerCase()} shown up for you recently — and what did it cost you in that moment?`; },
+    action(ctx){ return ctx.blocker.blockerAction; }
+  },
+  { weekNum:4, phase:1, title:"Building a Stable Foundation",
+    exercises:["Simple Daily Routine Builder", "Weekly Planning Template", "Energy and Time Review", "Support-Needs Assessment", "Boundary Action", "Environment Reset Checklist"],
+    render(ctx){ return `
+      <p>${ctx.name}, this week is about building something steady underneath you — one simple routine, one honest look at your time and energy, and one boundary that protects both.</p>
+      <p>Your growth priority to keep in mind here: <strong>${ctx.growthPriorities[0].name}</strong> — ${ctx.growthPriorities[0].meta.action}</p>`;
+    },
+    journalPrompt(ctx){ return `What is one part of your daily life that feels unstable right now, and what would "stable enough" look like?`; },
+    action(ctx){ return `Complete your 30-day progress review: what's different now compared to day 1?`; }
+  },
+  { weekNum:5, phase:2, title:"Confidence Through Action",
+    exercises:["Confidence Evidence Inventory", "Small Courageous Action Challenge", "Decision-Making Exercise", "Progress-Over-Perfection Reflection", "Visible Action Assignment"],
+    render(ctx){ return `
+      <p>${ctx.name}, confidence is rarely a feeling you wait for — it's usually the byproduct of action taken before you felt fully ready. This week is about practicing exactly that.</p>
+      <p>Lean on your strength in <strong>${ctx.strengths[0].name}</strong> as evidence: ${ctx.strengths[0].meta.strengthMeaning}</p>`;
+    },
+    journalPrompt(ctx){ return `What is one piece of evidence from your own life that you are more capable than your doubts suggest?`; },
+    action(ctx){ return `Take one small, visible action this week that feels a little uncomfortable — and notice what actually happens afterward.`; }
+  },
+  { weekNum:6, phase:2, title:"Structure That Supports You",
+    exercises:["Weekly Rhythm Builder", "Three-Priority Planning Method", "Habit Anchor Exercise", "Remove-or-Reduce Activity", "Calendar Planning Tool", "Personal Reset Routine"],
+    render(ctx){ return `<p>${ctx.name}, structure isn't about rigidity — it's about building a rhythm simple enough to actually keep. This week, you'll build (or refine) the weekly rhythm that supports your 90-day focus.</p>`;},
+    journalPrompt(ctx){ return `What is one thing you could remove or reduce this week to make room for what matters most?`; },
+    action(ctx){ return `Choose your top three priorities for the week ahead, and block time for them before anything else fills your calendar.`; }
+  },
+  { weekNum:7, phase:2, title:"Boundaries and Support",
+    exercises:["Support-Circle Map", "Boundary Sentence Builder", "Request-for-Help Exercise", "Energy-Drain Reflection", "Accountability Partner Plan", "Healthy Communication Checklist"],
+    render(ctx){ return `<p>${ctx.name}, no meaningful growth happens in isolation. This week is about naming who is actually in your corner, and practicing asking for what you need in a clear, healthy way.</p>`;},
+    journalPrompt(ctx){ return `Who is one person you could invite further into this season, and what would you ask of them?`; },
+    action(ctx){ return `Ask one person for one specific kind of help or encouragement this week.`; }
+  },
+  { weekNum:8, phase:2, title:"From Planning to Execution",
+    exercises:["Goal-to-Task Breakdown Tool", "Seven-Day Implementation Sprint", "Obstacle Planning", "Minimum Viable Action Exercise", "Completion Tracker"],
+    render(ctx){ return `<p>${ctx.name}, this week turns your plans into motion. You'll break your ${ctx.growthPriorities[0].name} goal into small enough steps that finishing becomes far more likely than stalling.</p>`;},
+    journalPrompt(ctx){ return `What has usually stopped you from finishing what you start — and what's one way to plan around that this time?`; },
+    action(ctx){ return `Complete your 60-day progress review and identify the very next step for the goal you're building.`; }
+  },
+  { weekNum:9, phase:3, title:"Becoming Visible",
+    exercises:["Visibility-Readiness Reflection", "Fear-vs-Purpose Exercise", "Communication Preparation", "Share-Your-Progress Challenge (private option available)"],
+    render(ctx){ return `<p>${ctx.name}, this week invites you to let your progress be seen — in whatever way fits your calling, career, business, relationships, or personal growth. Private completion is always an option if public sharing isn't right for you.</p>`;},
+    journalPrompt(ctx){ return `What feels most vulnerable about being seen in this next step — and what's underneath that fear?`; },
+    action(ctx){ return `Take one action related to your goal that involves being seen — even in a small, low-stakes way.`; }
+  },
+  { weekNum:10, phase:3, title:"Refining the Blueprint",
+    exercises:["What Is Working Review", "What Is Not Working Review", "Simplification Exercise", "System Improvement Checklist", "Habit Adjustment Tool", "Priority Realignment"],
+    render(ctx){ return `<p>${ctx.name}, real growth often looks like subtraction as much as addition. This week, review what's actually working, and simplify or remove what isn't serving this season anymore.</p>`;},
+    journalPrompt(ctx){ return `What is one thing you're doing out of habit rather than purpose — and is it still serving you?`; },
+    action(ctx){ return `Simplify or remove one commitment, habit, or routine that isn't serving your 90-day focus.`; }
+  },
+  { weekNum:11, phase:3, title:"Leadership and Stewardship",
+    exercises:["Self-Leadership Reflection", "Responsibility-vs-Overresponsibility Exercise", "Decision Ownership", "Service and Contribution Plan"],
+    render(ctx){ return `<p>${ctx.name}, leadership often starts with how you steward what's already in your hands — your time, your gifts, your relationships. This week is about owning your decisions and considering how you might serve or contribute from where you are.</p>`;},
+    journalPrompt(ctx){ return `Where are you carrying more responsibility than is actually yours to carry — and where could you carry more ownership?`; },
+    action(ctx){ return `Identify one way you can offer your strengths in service to someone else this week, without overextending yourself.`; }
+  },
+  { weekNum:12, phase:3, title:"Legacy and Continuation",
+    exercises:["90-Day Transformation Review", "Before-and-After Reflection", "Lessons Learned", "Strengths Developed", "Next 90-Day Vision", "Legacy Statement"],
+    render(ctx){ return `<p>${ctx.name}, you've spent 90 days practicing clarity, confidence, structure, recovery, support, and execution. This week is for reflecting honestly on what's changed, celebrating real progress, and naming what's next.</p>`;},
+    journalPrompt(ctx){ return `Looking back at day one, what is different about you now — in how you think, act, or see yourself?`; },
+    action(ctx){ return `Write your Next 90-Day Vision and a short Legacy Statement — what you want this season of building to leave behind.`; }
+  }
+];
+
+const PHASE_INFO = {
+  1: { label: "Clarify & Stabilize", range: "Days 1–30", purpose: "Understand your current season, reduce overwhelm, establish a stable foundation, and choose a clear direction." },
+  2: { label: "Build & Practice", range: "Days 31–60", purpose: "Practice confidence, consistency, boundaries, execution, and accountability." },
+  3: { label: "Expand & Sustain", range: "Days 61–90", purpose: "Become more visible, strengthen leadership, sustain progress, and connect present actions to long-term legacy." }
+};
+
+const DAILY_REFLECTIONS = [
+  "What is one thing you're grateful for today, connected to your growth?",
+  "Where did you show up for yourself today, even in a small way?",
+  "What felt hard today, and what did you learn from it?",
+  "What is one thought you want to release before tomorrow?",
+  "Where did you notice your top strength show up today?",
+  "What is one honest thing you need to admit to yourself today?"
+];
+const DAILY_ACTIONS_POOL = [
+  "Spend five minutes writing about your 90-day focus.",
+  "Take one small action tied to this week's theme, however small.",
+  "Reach out to one person who supports your growth.",
+  "Protect one block of time today for what matters most.",
+  "Say no to one thing that doesn't serve this season.",
+  "Celebrate one piece of progress, out loud or in writing."
+];
+const DAILY_AFFIRMATIONS = [
+  "You can begin again today.",
+  "Progress is not erased because your pace changed.",
+  "Your Blueprint can be adjusted as your life changes.",
+  "Small, honest steps are still real steps.",
+  "You are allowed to build at a sustainable pace.",
+  "Today's effort matters, even if it's imperfect.",
+  "You don't need to see the whole staircase to take the next step.",
+  "Rest is part of building, not a delay of it.",
+  "You are capable of more than your doubts suggest.",
+  "Consistency compounds, even when it feels slow."
+];
+
+function weekForDay(day){
+  return Math.min(12, Math.max(1, Math.floor((day - 1) * 12 / 90) + 1));
+}
+
+/* ============================================================
+   SECTION: DASHBOARD NAVIGATION
+============================================================ */
+function goToDashboard(){
+  if(!verifyPurchaseAccess() && !DEVELOPMENT_PREVIEW_MODE){
+    goToPaywall();
+    return;
+  }
+  if(!loadPaidJourneyProgress()){ initJourneyState(); }
+  const res = loadAssessmentResults();
+  const name = (res && res.userName) ? res.userName : "Friend";
+  document.getElementById("dashWelcome").textContent = `Welcome back, ${name}`;
+  showScreen("screen-dashboard");
+  renderDashStats();
+  renderOnboardingChecklist();
+  showPanel("continue");
+}
+
+const ONBOARDING_STEPS = [
+  "Review your Blueprint results.",
+  "Confirm your primary 90-day goal.",
+  "Choose your preferred weekly review day.",
+  "Set an optional accountability reminder.",
+  "Begin Week One.",
+  "Download your personal Blueprint summary.",
+  "Save the coaching page for future support."
+];
+function renderOnboardingChecklist(){
+  const wrap = document.getElementById("onboardingChecklistWrap");
+  if(!wrap) return;
+  if(journeyState.onboardingDismissed){ wrap.innerHTML = ""; return; }
+  const ctx = getCtx();
+  wrap.innerHTML = `
+    <div class="module-block" style="background:var(--lavender); border-color:var(--purple);">
+      <h3 style="color:var(--purple);">Your Blueprint Journey Is Ready.</h3>
+      <p>You have already completed one of the most important steps: becoming honest about where you are and intentional about where you want to go. Your personalized journey now turns those insights into focused, manageable action.</p>
+      <p style="font-size:0.85rem; color:var(--charcoal);">Lifetime access confirmed &middot; Personalized journey generated for ${ctx.name} &middot; Assessment results securely connected &middot; 12 weekly modules unlocked &middot; Daily action plan unlocked &middot; Journal unlocked &middot; Check-ins unlocked &middot; Progress dashboard unlocked &middot; Printable tools unlocked &middot; Milestone cards unlocked &middot; Completion certificate available after completion &middot; Coaching recommendations available when needed</p>
+      <h4 style="color:var(--royal); margin-top:12px;">Getting Started</h4>
+      ${ONBOARDING_STEPS.map((s,i) => `<div class="onboarding-item"><input type="checkbox" id="ob_${i}" ${journeyState.onboardingChecks && journeyState.onboardingChecks[i] ? "checked" : ""} onchange="toggleOnboardingStep(${i}, this.checked)"><label for="ob_${i}">${s}</label></div>`).join("")}
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-primary btn-small" onclick="showPanel('continue')">Start My Journey</button>
+        <button class="btn btn-outline btn-small" onclick="showPanel('plan')">View My Personalized Plan</button>
+        <button class="btn btn-outline btn-small" onclick="printResource('assessment')">Download My Blueprint</button>
+        <button class="btn btn-outline btn-small" onclick="dismissOnboarding()">Dismiss</button>
+      </div>
+    </div>`;
+}
+function toggleOnboardingStep(i, checked){
+  journeyState.onboardingChecks = journeyState.onboardingChecks || {};
+  journeyState.onboardingChecks[i] = checked;
+  savePaidJourneyProgress();
+}
+function dismissOnboarding(){
+  journeyState.onboardingDismissed = true;
+  savePaidJourneyProgress();
+  renderOnboardingChecklist();
+}
+
+function getCtx(){
+  const res = loadAssessmentResults();
+  if(!res){
+    return {
+      name: "Friend",
+      season: SEASONS.foundation,
+      growthPriorities: [ {key:"clarity", name:"Clarity", meta: DIMENSIONS.clarity}, {key:"confidence", name:"Confidence", meta: DIMENSIONS.confidence}, {key:"structure", name:"Structure", meta: DIMENSIONS.structure} ],
+      strengths: [ {key:"execution", name:"Execution", meta: DIMENSIONS.execution}, {key:"support", name:"Support & Boundaries", meta: DIMENSIONS.support}, {key:"recovery", name:"Recovery & Resilience", meta: DIMENSIONS.recovery} ],
+      blocker: DIMENSIONS.clarity, blockerKey: "clarity", rawDimScores: [], reflections: {}
+    };
+  }
+  return {
+    name: res.userName || "Friend",
+    season: SEASONS[res.seasonKey] || SEASONS.foundation,
+    growthPriorities: res.growthPriorities.map(g => ({ ...g, meta: DIMENSIONS[g.key] })),
+    strengths: res.strengths.map(s => ({ ...s, meta: DIMENSIONS[s.key] })),
+    blocker: DIMENSIONS[res.blockerKey] || DIMENSIONS.clarity,
+    blockerKey: res.blockerKey || "clarity",
+    rawDimScores: res.dimScores || [],
+    reflections: res.reflections || {}
+  };
+}
+
+function renderDashStats(){
+  const ctx = getCtx();
+  const totalWeeksDone = Object.keys(journeyState.completedWeeks).filter(k => journeyState.completedWeeks[k]).length;
+  const overallCompletionPct = Math.round((totalWeeksDone / 12) * 100);
+  const currentWeek = journeyState.currentWeek;
+  const currentModule = WEEK_MODULES[currentWeek - 1];
+  const phase = PHASE_INFO[currentModule.phase];
+  const daysRemaining = Math.max(0, 90 - journeyState.currentDay);
+
+  const stats = [
+    ["Blueprint Season", ctx.season.name],
+    ["Current Day", `Day ${journeyState.currentDay} of 90`],
+    ["Overall Completion", overallCompletionPct + "%"],
+    ["Current Phase", `Phase ${currentModule.phase}: ${phase.label}`],
+    ["Current Module", `Week ${currentModule.weekNum}: ${currentModule.title}`],
+    ["Days Remaining", daysRemaining]
+  ];
+  const wrap = document.getElementById("dashStats");
+  wrap.innerHTML = stats.map(([label,val]) => `<div class="stat-box"><div class="stat-label">${label}</div><div class="stat-value">${val}</div></div>`).join("");
+}
+
+function showPanel(name){
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  const panel = document.getElementById("panel-" + name);
+  if(panel) panel.classList.add("active");
+  if(name === "continue") renderContinuePanel();
+  if(name === "plan") renderPlanPanel();
+  if(name === "checkin") renderCheckinPanel();
+  if(name === "journal") renderJournalPanel();
+  if(name === "progress") renderProgressPanel();
+  if(name === "downloads") renderDownloadsPanel();
+  if(name === "certificate") renderCertificatePanel();
+  if(name === "coaching") renderCoachingPanel();
+}
+
+/* ---- Coaching recommendation panel ---- */
+function renderCoachingPanel(){
+  const ctx = getCtx();
+  const rec = recommendCoaching(ctx);
+  const recEntry = CAL_BOOKING_TYPES[rec.key] || CAL_BOOKING_TYPES.generalStrategy;
+  const url = resolveCalUrl(rec.key);
+  trackEvent("coaching_recommendation_viewed", { category: rec.key });
+
+  document.getElementById("coachingRecWrap").innerHTML = `
+    <div class="coaching-rec-card">
+      <div class="result-eyebrow">Recommended for You</div>
+      <p>Based on your assessment and current focus, the service most aligned with your next step is:</p>
+      <h4>${recEntry.label}</h4>
+      <p><strong>Why this was recommended:</strong> ${rec.why}</p>
+      <p><strong>What this session may help clarify:</strong> ${rec.helps}</p>
+      <p style="font-size:0.78rem; color:#666;">This is a pattern-based suggestion from your assessment, not a clinical or definitive recommendation.</p>
+      <div class="btn-row">
+        <a class="btn btn-gold btn-small" href="${url}" target="_blank" rel="noopener noreferrer" onclick="trackEvent('coaching_booking_clicked', {category:'${rec.key}'})">Book This Session</a>
+        <a class="btn btn-outline btn-small" href="https://cal.com/kingdom-blueprint-legacy-qj14cj" target="_blank" rel="noopener noreferrer">View All Coaching Services</a>
+      </div>
+    </div>`;
+}
+
+/* ---- Continue Journey (module + daily action) ---- */
+function renderContinuePanel(){
+  const ctx = getCtx();
+  const weekIdx = (journeyState.viewWeek || journeyState.currentWeek) - 1;
+  const mod = WEEK_MODULES[weekIdx];
+  const phase = PHASE_INFO[mod.phase];
+  const isDone = !!journeyState.completedWeeks[mod.weekNum];
+
+  const exercisesHtml = mod.exercises.map((ex, i) => {
+    const savedVal = getExerciseValue(mod.weekNum, i);
+    return `<div class="exercise-block">
+      <label for="ex_${mod.weekNum}_${i}">${ex}</label>
+      <textarea id="ex_${mod.weekNum}_${i}" onblur="saveExerciseValue(${mod.weekNum}, ${i}, this.value)">${savedVal}</textarea>
+    </div>`;
+  }).join("");
+
+  document.getElementById("moduleContainer").innerHTML = `
+    <div class="module-block">
+      <span class="phase-tag">Phase ${mod.phase} &middot; ${phase.label} &middot; ${phase.range}</span>
+      <h3>Week ${mod.weekNum}: ${mod.title}</h3>
+      ${mod.render(ctx)}
+      ${exercisesHtml}
+      <div class="exercise-block">
+        <label for="journalPromptField_${mod.weekNum}">Journal Prompt: ${mod.journalPrompt(ctx)}</label>
+        <textarea id="journalPromptField_${mod.weekNum}" onblur="saveExerciseValue(${mod.weekNum}, 'journal', this.value)">${getExerciseValue(mod.weekNum, 'journal')}</textarea>
+      </div>
+      <p><strong>Action step:</strong> ${mod.action(ctx)}</p>
+      <div class="exercise-block">
+        <label for="commit_${mod.weekNum}">Weekly Commitment: "This week, I will..."</label>
+        <textarea id="commit_${mod.weekNum}" onblur="saveExerciseValue(${mod.weekNum}, 'commitment', this.value)">${getExerciseValue(mod.weekNum, 'commitment')}</textarea>
+      </div>
+      <div class="btn-row">
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem;">
+          <input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleWeekComplete(${mod.weekNum}, this.checked)"> Mark This Module Complete
+        </label>
+      </div>
+      ${ mod.weekNum % 4 === 0 ? `<div class="coaching-invite">You have done meaningful independent work. If you would benefit from personalized guidance, accountability, or help applying your Blueprint to your life, career, relationships, or business, you may book a private strategy session.<div class="btn-row"><a class="btn btn-gold btn-small" href="https://cal.com/kingdom-blueprint-legacy-qj14cj" target="_blank" rel="noopener noreferrer">Book Personal Coaching</a></div></div>` : "" }
+    </div>`;
+
+  renderDailyAction();
+}
+
+function getExerciseValue(weekNum, idx){
+  const key = `w${weekNum}_ex${idx}`;
+  return (journeyState.dailyNotes && journeyState.dailyNotes[key]) ? journeyState.dailyNotes[key] : "";
+}
+function saveExerciseValue(weekNum, idx, val){
+  journeyState.dailyNotes = journeyState.dailyNotes || {};
+  journeyState.dailyNotes[`w${weekNum}_ex${idx}`] = val;
+  savePaidJourneyProgress();
+}
+
+function toggleWeekComplete(weekNum, checked){
+  journeyState.completedWeeks[weekNum] = checked;
+  if(checked){
+    trackEvent("module_completed", { week: weekNum });
+    if([4,8,12].includes(weekNum)) trackEvent("phase_completed", { phase: WEEK_MODULES[weekNum-1].phase });
+    const totalDone = Object.keys(journeyState.completedWeeks).filter(k => journeyState.completedWeeks[k]).length;
+    if(totalDone === 12) trackEvent("journey_completed", {});
+  }
+  if(checked && weekNum === journeyState.currentWeek && journeyState.currentWeek < 12){
+    journeyState.currentWeek += 1;
+  }
+  savePaidJourneyProgress();
+  renderDashStats();
+  maybeShowCertificate();
+}
+
+function renderDailyAction(){
+  const day = journeyState.viewDay || journeyState.currentDay;
+  const weekNum = weekForDay(day);
+  const mod = WEEK_MODULES[weekNum - 1];
+  const reflect = DAILY_REFLECTIONS[day % DAILY_REFLECTIONS.length];
+  const action = DAILY_ACTIONS_POOL[day % DAILY_ACTIONS_POOL.length];
+  const affirmation = DAILY_AFFIRMATIONS[day % DAILY_AFFIRMATIONS.length];
+  const done = !!journeyState.dailyCompletion[day];
+  const note = journeyState.dailyNotes[`day${day}`] || "";
+
+  document.getElementById("dayIndicator").textContent = `Day ${day} of 90 (Week ${weekNum}: ${mod.title})`;
+  document.getElementById("dailyActionContainer").innerHTML = `
+    <div class="module-block">
+      <h3 style="font-size:1rem;">Today's Focus</h3>
+      <p>${mod.title} &mdash; approximately 5&ndash;15 minutes.</p>
+      <p><strong>Reflection:</strong> ${reflect}</p>
+      <p><strong>Practical action:</strong> ${action}</p>
+      <p class="affirmation">"${affirmation}"</p>
+      <div class="exercise-block">
+        <label for="dayNote_${day}">Private note (optional)</label>
+        <textarea id="dayNote_${day}" onblur="saveDayNote(${day}, this.value)">${note}</textarea>
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem;">
+        <input type="checkbox" ${done ? "checked" : ""} onchange="toggleDayComplete(${day}, this.checked)"> Mark today's action complete
+      </label>
+    </div>`;
+}
+
+function saveDayNote(day, val){
+  journeyState.dailyNotes[`day${day}`] = val;
+  savePaidJourneyProgress();
+}
+function toggleDayComplete(day, checked){
+  journeyState.dailyCompletion[day] = checked;
+  if(checked && day === journeyState.currentDay && journeyState.currentDay < 90){
+    journeyState.currentDay += 1;
+  }
+  savePaidJourneyProgress();
+  renderDashStats();
+}
+function changeDay(delta){
+  let d = (journeyState.viewDay || journeyState.currentDay) + delta;
+  d = Math.min(90, Math.max(1, d));
+  journeyState.viewDay = d;
+  savePaidJourneyProgress();
+  renderDailyAction();
+}
+
+/* ---- 90-Day Plan panel (week list) ---- */
+function renderPlanPanel(){
+  const wrap = document.getElementById("weekListWrap");
+  wrap.innerHTML = WEEK_MODULES.map(m => {
+    const done = !!journeyState.completedWeeks[m.weekNum];
+    return `<div class="week-list-item">
+      <div><span class="wl-phase">Phase ${m.phase} &middot; ${PHASE_INFO[m.phase].label}</span><br><span class="wl-title">Week ${m.weekNum}: ${m.title}</span></div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="status-pill ${done ? "done" : "open"}">${done ? "Complete" : "Open"}</span>
+        <button class="btn btn-outline btn-small" onclick="openWeek(${m.weekNum})">View</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+function openWeek(weekNum){
+  journeyState.viewWeek = weekNum;
+  savePaidJourneyProgress();
+  showPanel("continue");
+}
+
+/* ---- Weekly Check-In panel ---- */
+const CHECKIN_DIMENSIONS = ["Clarity","Confidence","Structure","Energy","Support","Execution"];
+const CHECKIN_QUESTIONS = [
+  "What did I complete?", "What felt difficult?", "What did I learn about myself?",
+  "What needs to change next week?", "What support do I need?", "What is one win I want to acknowledge?"
+];
+function renderCheckinPanel(){
+  const week = journeyState.currentWeek;
+  const existing = journeyState.checkins[week] || { ratings: {}, answers: {} };
+  let ratingsHtml = CHECKIN_DIMENSIONS.map(dim => {
+    const sel = existing.ratings[dim] || 0;
+    const buttons = [1,2,3,4,5].map(n => `<button type="button" class="${n===sel?'selected':''}" onclick="setCheckinRating('${dim}', ${n})">${n}</button>`).join("");
+    return `<div class="checkin-row"><span>${dim}</span><div class="checkin-scale">${buttons}</div></div>`;
+  }).join("");
+  let questionsHtml = CHECKIN_QUESTIONS.map((q, i) => {
+    const val = existing.answers[i] || "";
+    return `<div class="exercise-block"><label>${q}</label><textarea onblur="setCheckinAnswer(${i}, this.value)">${val}</textarea></div>`;
+  }).join("");
+
+  let historyHtml = "";
+  const weeksWithData = Object.keys(journeyState.checkins).map(Number).sort((a,b)=>a-b);
+  if(weeksWithData.length){
+    historyHtml = "<h4 style='color:var(--royal); margin-top:24px;'>Check-In History</h4>" + weeksWithData.map(w => {
+      const r = journeyState.checkins[w].ratings;
+      const line = CHECKIN_DIMENSIONS.map(d => `${d}: ${r[d]||"-"}`).join(" &middot; ");
+      return `<p class="progress-metric"><span>Week ${w}</span><span>${line}</span></p>`;
+    }).join("");
+  }
+
+  document.getElementById("checkinWrap").innerHTML = `
+    <div class="module-block">
+      <p>Rate each area from 1 (rarely true) to 5 (consistently true) for this week. These are self-ratings for your own reflection, not clinical measurements.</p>
+      ${ratingsHtml}
+      <h4 style="color:var(--royal); margin-top:18px;">This Week's Reflection</h4>
+      ${questionsHtml}
+      <div class="btn-row"><button class="btn btn-primary btn-small" onclick="saveCheckin()">Save Check-In</button></div>
+    </div>
+    ${historyHtml}`;
+}
+function setCheckinRating(dim, val){
+  const week = journeyState.currentWeek;
+  journeyState.checkins[week] = journeyState.checkins[week] || { ratings:{}, answers:{} };
+  journeyState.checkins[week].ratings[dim] = val;
+  savePaidJourneyProgress();
+  renderCheckinPanel();
+}
+function setCheckinAnswer(i, val){
+  const week = journeyState.currentWeek;
+  journeyState.checkins[week] = journeyState.checkins[week] || { ratings:{}, answers:{} };
+  journeyState.checkins[week].answers[i] = val;
+  savePaidJourneyProgress();
+}
+function saveCheckin(){
+  savePaidJourneyProgress();
+  alert("Your weekly check-in has been saved.");
+  renderProgressPanel();
+}
+
+/* ---- Journal panel ---- */
+function loadJournal(){
+  try{ const raw = localStorage.getItem(JOURNAL_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+}
+function saveJournalList(list){
+  try{ localStorage.setItem(JOURNAL_KEY, JSON.stringify(list)); }catch(e){ console.warn("Could not save journal:", e); }
+}
+function renderJournalPanel(){
+  const row = document.getElementById("journalMoodRow");
+  if(row && !row.dataset.built){
+    row.innerHTML = [1,2,3,4,5].map(n => `<button type="button" data-mood="${n}" onclick="selectJournalMood(${n})">${n}</button>`).join("");
+    row.dataset.built = "1";
+  }
+  renderJournalList();
+}
+let selectedJournalMood = null;
+function selectJournalMood(n){
+  selectedJournalMood = n;
+  document.querySelectorAll("#journalMoodRow button").forEach(b => b.classList.toggle("selected", Number(b.dataset.mood) === n));
+}
+function addJournalEntry(){
+  const text = document.getElementById("journalEntryText").value.trim();
+  if(!text) return;
+  const list = loadJournal();
+  list.unshift({
+    id: "je_" + Date.now(),
+    date: new Date().toISOString(),
+    module: document.getElementById("journalModuleLabel").value.trim(),
+    prompt: "",
+    entry: text,
+    mood: selectedJournalMood
+  });
+  saveJournalList(list);
+  document.getElementById("journalEntryText").value = "";
+  document.getElementById("journalModuleLabel").value = "";
+  selectedJournalMood = null;
+  document.querySelectorAll("#journalMoodRow button").forEach(b => b.classList.remove("selected"));
+  renderJournalList();
+}
+function deleteJournalEntry(id){
+  if(!confirm("Delete this journal entry?")) return;
+  saveJournalList(loadJournal().filter(e => e.id !== id));
+  renderJournalList();
+}
+function editJournalEntry(id){
+  const list = loadJournal();
+  const entry = list.find(e => e.id === id);
+  if(!entry) return;
+  const updated = prompt("Edit your entry:", entry.entry);
+  if(updated === null) return;
+  entry.entry = updated;
+  saveJournalList(list);
+  renderJournalList();
+}
+function renderJournalList(){
+  const search = (document.getElementById("journalSearch").value || "").toLowerCase();
+  const list = loadJournal().filter(e => !search || e.entry.toLowerCase().includes(search) || (e.module||"").toLowerCase().includes(search));
+  document.getElementById("journalListWrap").innerHTML = list.map(e => `
+    <div class="journal-entry">
+      <div class="je-meta">${new Date(e.date).toLocaleString()} ${e.module ? "&middot; " + e.module : ""} ${e.mood ? "&middot; Mood: " + e.mood + "/5" : ""}</div>
+      <p style="margin:0 0 8px;">${e.entry.replace(/</g,"&lt;")}</p>
+      <div class="btn-row"><button class="btn btn-outline btn-small" onclick="editJournalEntry('${e.id}')">Edit</button><button class="btn btn-outline btn-small" onclick="deleteJournalEntry('${e.id}')">Delete</button></div>
+    </div>`).join("") || "<p style='color:#888; font-size:0.9rem;'>No journal entries yet.</p>";
+}
+function exportJournal(){
+  const list = loadJournal();
+  let text = "THE BLUEPRINT CODE™ — JOURNAL EXPORT\n\n";
+  list.forEach(e => {
+    text += `Date: ${new Date(e.date).toLocaleString()}\nModule: ${e.module||"-"}\nMood: ${e.mood||"-"}/5\nEntry:\n${e.entry}\n\n---\n\n`;
+  });
+  downloadTextFile("blueprint-code-journal-export.txt", text);
+}
+
+/* ---- Progress Tracker panel ---- */
+function renderProgressPanel(){
+  const totalWeeksDone = Object.keys(journeyState.completedWeeks).filter(k => journeyState.completedWeeks[k]).length;
+  const totalDaysDone = Object.keys(journeyState.dailyCompletion).filter(k => journeyState.dailyCompletion[k]).length;
+  const phase1Done = [1,2,3,4].filter(w => journeyState.completedWeeks[w]).length;
+  const phase2Done = [5,6,7,8].filter(w => journeyState.completedWeeks[w]).length;
+  const phase3Done = [9,10,11,12].filter(w => journeyState.completedWeeks[w]).length;
+  const journalCount = loadJournal().length;
+  const checkinCount = Object.keys(journeyState.checkins).length;
+
+  let longest = 0, run = 0;
+  for(let d=1; d<=90; d++){
+    if(journeyState.dailyCompletion[d]){ run++; longest = Math.max(longest, run); }
+    else { run = 0; }
+  }
+  let streak = 0;
+  for(let d=journeyState.currentDay; d>=1; d--){
+    if(journeyState.dailyCompletion[d]) streak++; else break;
+  }
+
+  const milestones = [];
+  if(phase1Done === 4) milestones.push("Completed Phase One: Clarify & Stabilize");
+  if(phase2Done === 4) milestones.push("Completed Phase Two: Build & Practice");
+  if(phase3Done === 4) milestones.push("Completed Phase Three: Expand & Sustain");
+  if(totalWeeksDone === 12) milestones.push("Completed the full 90-Day Blueprint Journey");
+  if(journalCount >= 10) milestones.push("Wrote 10+ journal entries");
+
+  const weeksWithRatings = Object.keys(journeyState.checkins).map(Number).sort((a,b)=>a-b);
+  let dimensionProgressHtml = "<p style='color:#888; font-size:0.9rem;'>Complete a weekly check-in to see your dimension progress here.</p>";
+  if(weeksWithRatings.length){
+    const latest = journeyState.checkins[weeksWithRatings[weeksWithRatings.length-1]].ratings;
+    dimensionProgressHtml = CHECKIN_DIMENSIONS.map(d => {
+      const val = latest[d] || 0;
+      return `<div class="progress-metric"><span>${d}</span><span>${"&#9733;".repeat(val)}${"&#9734;".repeat(5-val)}</span></div>`;
+    }).join("");
+  }
+
+  document.getElementById("progressWrap").innerHTML = `
+    <div class="module-block">
+      <div class="streak-badge">Current streak: ${streak} day${streak===1?"":"s"}</div>
+      <div class="streak-badge">Longest streak: ${longest} day${longest===1?"":"s"}</div>
+      <div class="progress-metric"><span>Overall course completion</span><span>${Math.round((totalWeeksDone/12)*100)}%</span></div>
+      <div class="progress-metric"><span>Phase 1 completion</span><span>${phase1Done}/4 weeks</span></div>
+      <div class="progress-metric"><span>Phase 2 completion</span><span>${phase2Done}/4 weeks</span></div>
+      <div class="progress-metric"><span>Phase 3 completion</span><span>${phase3Done}/4 weeks</span></div>
+      <div class="progress-metric"><span>Daily actions completed</span><span>${totalDaysDone}/90</span></div>
+      <div class="progress-metric"><span>Journal entries</span><span>${journalCount}</span></div>
+      <div class="progress-metric"><span>Weekly check-ins completed</span><span>${checkinCount}/12</span></div>
+      <h4 style="color:var(--royal); margin-top:20px;">Dimension Progress (latest check-in)</h4>
+      ${dimensionProgressHtml}
+      <h4 style="color:var(--royal); margin-top:20px;">Milestones</h4>
+      ${ milestones.length ? milestones.map(m => `<p class="progress-metric"><span>${m}</span><span>&#10003;</span></p>`).join("") : "<p style='color:#888; font-size:0.9rem;'>Your milestones will appear here as you go.</p>" }
+      <p style="margin-top:18px; font-size:0.88rem; color:var(--purple); font-style:italic;">You can begin again today. Progress is not erased because your pace changed. Your Blueprint can be adjusted as your life changes.</p>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-small" onclick="exportPaidJourneyReport()">Export Progress Report</button>
+        <button class="btn btn-outline btn-small" onclick="resetPaidJourneyProgress()">Reset Journey Progress</button>
+      </div>
+    </div>`;
+  maybeShowCertificate();
+}
+function maybeShowCertificate(){
+  const totalWeeksDone = Object.keys(journeyState.completedWeeks).filter(k => journeyState.completedWeeks[k]).length;
+  if(totalWeeksDone === 12){
+    document.getElementById("panel-certificate").style.display = "block";
+  }
+}
+
+/* ---- Downloads panel ---- */
+const DOWNLOAD_ITEMS = [
+  { key:"assessment", label:"Personal Assessment Report" },
+  { key:"plan90", label:"90-Day Plan" },
+  { key:"weeklyplanning", label:"Weekly Planning Page" },
+  { key:"dailyaction", label:"Daily Action Page" },
+  { key:"boundary", label:"Boundary Sentence Builder" },
+  { key:"supportmap", label:"Support-Circle Map" },
+  { key:"goalbreakdown", label:"Goal Breakdown Worksheet" },
+  { key:"checkin", label:"Weekly Check-In (current week)" },
+  { key:"progresssummary", label:"Progress Summary" },
+  { key:"nextvision", label:"Next 90-Day Vision" },
+  { key:"certificate", label:"Completion Certificate" }
+];
+function renderDownloadsPanel(){
+  document.getElementById("downloadListWrap").innerHTML = DOWNLOAD_ITEMS.map(item =>
+    `<div class="download-item"><span>${item.label}</span><button class="btn btn-outline btn-small no-print" onclick="printResource('${item.key}')">Print / Save as PDF</button></div>`
+  ).join("");
+}
+function printResource(key){
+  const ctx = getCtx();
+  const area = document.getElementById("printArea");
+  let html = "";
+  switch(key){
+    case "assessment":
+      html = `<h2>Personal Assessment Report</h2><p><strong>Name:</strong> ${ctx.name}</p><p><strong>Blueprint Season:</strong> ${ctx.season.name}</p><p>${ctx.season.desc}</p><h3>Top Growth Priorities</h3><ul>${ctx.growthPriorities.map(g=>`<li>${g.name} (${g.pct}%)</li>`).join("")}</ul><h3>Core Strengths</h3><ul>${ctx.strengths.map(s=>`<li>${s.name} (${s.pct}%)</li>`).join("")}</ul>`;
+      break;
+    case "plan90":
+      html = `<h2>90-Day Plan</h2>${document.getElementById("phase1List").outerHTML}${document.getElementById("phase2List").outerHTML}${document.getElementById("phase3List").outerHTML}`;
+      break;
+    case "weeklyplanning":
+      html = `<h2>Weekly Planning Page</h2><p>Week of: _______________</p><p>Top 3 priorities:</p><p>1. ______________________________</p><p>2. ______________________________</p><p>3. ______________________________</p><p>Notes:</p><p>______________________________</p><p>______________________________</p>`;
+      break;
+    case "dailyaction":
+      html = `<h2>Daily Action Page — Day ${journeyState.viewDay || journeyState.currentDay}</h2><p>Focus: ______________________________</p><p>Reflection: ______________________________</p><p>Action: ______________________________</p><p>Note: ______________________________</p>`;
+      break;
+    case "boundary":
+      html = `<h2>Boundary Sentence Builder</h2><p>"I am not able to _____________________ right now, but I can _____________________."</p><p>Write three boundary sentences for this season:</p><p>1. ______________________________</p><p>2. ______________________________</p><p>3. ______________________________</p>`;
+      break;
+    case "supportmap":
+      html = `<h2>Support-Circle Map</h2><p>Name three people who support your growth, and one specific way they help:</p><p>1. ______________________________</p><p>2. ______________________________</p><p>3. ______________________________</p>`;
+      break;
+    case "goalbreakdown":
+      html = `<h2>Goal Breakdown Worksheet</h2><p>Goal: ______________________________</p><p>Step 1: ______________________________</p><p>Step 2: ______________________________</p><p>Step 3: ______________________________</p><p>Obstacle and plan: ______________________________</p>`;
+      break;
+    case "checkin": {
+      const week = journeyState.currentWeek;
+      const data = journeyState.checkins[week] || { ratings:{}, answers:{} };
+      html = `<h2>Weekly Check-In — Week ${week}</h2>` + CHECKIN_DIMENSIONS.map(d => `<p>${d}: ${data.ratings[d] || "-"}/5</p>`).join("") + CHECKIN_QUESTIONS.map((q,i) => `<p><strong>${q}</strong><br>${(data.answers[i]||"______________________________")}</p>`).join("");
+      break;
+    }
+    case "progresssummary": {
+      const totalWeeksDone = Object.keys(journeyState.completedWeeks).filter(k => journeyState.completedWeeks[k]).length;
+      html = `<h2>Progress Summary</h2><p>Weeks completed: ${totalWeeksDone}/12</p><p>Current day: ${journeyState.currentDay}/90</p><p>Blueprint Season: ${ctx.season.name}</p>`;
+      break;
+    }
+    case "nextvision":
+      html = `<h2>Next 90-Day Vision</h2><p>What I want my next 90 days to look like:</p><p>______________________________</p><p>______________________________</p><p>One promise I'm making to myself:</p><p>______________________________</p>`;
+      break;
+    case "certificate":
+      html = buildCertificateHTML(ctx);
+      break;
+  }
+  area.innerHTML = html;
+  area.classList.add("print-active");
+  document.body.classList.add("printing-single");
+  window.onafterprint = () => { area.classList.remove("print-active"); document.body.classList.remove("printing-single"); window.onafterprint = null; };
+  window.print();
+}
+
+/* ---- Certificate ---- */
+function buildCertificateHTML(ctx){
+  const ref = "KBL-" + new Date().getFullYear() + "-" + Math.random().toString(36).slice(2,8).toUpperCase();
+  return `<div class="cert-card">
+    <p style="font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold);">Kingdom Blueprint Legacy</p>
+    <h2>The Blueprint Code™ Personalized 90-Day Growth Journey</h2>
+    <p>Presented to</p>
+    <p class="cert-name">${ctx.name}</p>
+    <p>For completing a 90-day personal-development journey focused on clarity, confidence, structure, resilience, support, execution, and intentional growth.</p>
+    <p>Completion date: ${new Date().toLocaleDateString()}</p>
+    <p style="font-size:0.75rem; color:#888;">Certificate reference: ${ref}</p>
+    <p style="font-size:0.72rem; color:#888;">This certificate recognizes personal completion of a self-guided coaching program. It is not a professional certification, license, clinical credential, or academic qualification.</p>
+  </div>`;
+}
+function renderCertificatePanel(){
+  const ctx = getCtx();
+  const totalWeeksDone = Object.keys(journeyState.completedWeeks).filter(k => journeyState.completedWeeks[k]).length;
+  if(totalWeeksDone < 12){
+    document.getElementById("certificateWrap").innerHTML = `<p style="color:#777;">Complete all 12 weekly modules to generate your completion certificate. You're at ${totalWeeksDone}/12.</p>`;
+    return;
+  }
+  document.getElementById("certificateWrap").innerHTML = buildCertificateHTML(ctx) + `<div class="btn-row no-print" style="margin-top:16px;"><button class="btn btn-purple btn-small" onclick="printResource('certificate')">Print Certificate</button></div>`;
+}
+
+/* ---- Referral ---- */
+function copyReferralLink(){
+  const statusEl = document.getElementById("referralCopyStatus");
+  const url = (PUBLIC_ASSESSMENT_URL && PUBLIC_ASSESSMENT_URL !== "ADD_PUBLIC_ASSESSMENT_URL_HERE") ? PUBLIC_ASSESSMENT_URL : window.location.href.split("?")[0];
+  copyToClipboardGeneric(url, statusEl);
+}
+
+/* ---- Milestone share cards (no private data) ---- */
+function buildMilestoneShareText(milestoneLabel){
+  return `${milestoneLabel}\n\n#TheBlueprintCode #KingdomBlueprintLegacy`;
+}
+
+/* ============================================================
+   SECTION: ACCESSIBILITY — TEXT SIZE CONTROL
+============================================================ */
+function initFontScale(){
+  try{
+    const saved = parseFloat(localStorage.getItem("kbl_font_scale"));
+    if(saved){ document.documentElement.style.setProperty("--font-scale", saved); }
+  }catch(e){}
+}
+function adjustFontScale(delta){
+  const root = document.documentElement;
+  const current = parseFloat(getComputedStyle(root).getPropertyValue("--font-scale")) || 1;
+  const next = Math.min(1.5, Math.max(0.85, Math.round((current + delta) * 10) / 10));
+  root.style.setProperty("--font-scale", next);
+  try{ localStorage.setItem("kbl_font_scale", next); }catch(e){}
+}
+
+/* ============================================================
+   SECTION: SUPABASE AUTHENTICATION
+============================================================ */
+function showAuthMode(mode){
+  document.getElementById("authSignUpForm").style.display = mode === "signup" ? "block" : "none";
+  document.getElementById("authSignInForm").style.display = mode === "signin" ? "block" : "none";
+  document.getElementById("authForgotForm").style.display = mode === "forgot" ? "block" : "none";
+}
+
+async function signUpCustomer(){
+  const client = getSupabaseClient();
+  const errEl = document.getElementById("authError");
+  errEl.style.display = "none";
+  if(!client){ errEl.textContent = "Account creation isn't connected yet — see SETUP.md."; errEl.style.display = "block"; return; }
+
+  const firstName = document.getElementById("suFirstName").value.trim();
+  const email = document.getElementById("suEmail").value.trim();
+  const password = document.getElementById("suPassword").value;
+  const c1 = document.getElementById("authConsent1").checked;
+  const c2 = document.getElementById("authConsent2").checked;
+  const c3 = document.getElementById("authConsent3").checked;
+
+  if(!firstName || !email || !password || !c1 || !c2 || !c3){
+    errEl.textContent = "Please complete your name, email, password, and all three checkboxes.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  const { data, error } = await client.auth.signUp({
+    email, password,
+    options: { data: { first_name: firstName } }
+  });
+  if(error){ errEl.textContent = error.message; errEl.style.display = "block"; return; }
+
+  currentAuthUser = data?.user || null;
+
+  // Save/attach a profiles row (RLS allows a user to insert their own row).
+  if(currentAuthUser){
+    try{
+      await client.from("profiles").upsert({ id: currentAuthUser.id, first_name: firstName, email });
+    }catch(e){ console.warn("Could not upsert profile:", e); }
+    // Sync any locally completed assessment to the account.
+    await syncAssessmentToSupabase();
+  }
+
+  trackEvent("account_created", {});
+  // If they came here to buy, continue straight to checkout.
+  createSecureCheckout();
+}
+
+async function signInCustomer(){
+  const client = getSupabaseClient();
+  const errEl = document.getElementById("authErrorSignIn");
+  errEl.style.display = "none";
+  if(!client){ errEl.textContent = "Sign-in isn't connected yet — see SETUP.md."; errEl.style.display = "block"; return; }
+
+  const email = document.getElementById("siEmail").value.trim();
+  const password = document.getElementById("siPassword").value;
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if(error){ errEl.textContent = error.message; errEl.style.display = "block"; return; }
+  currentAuthUser = data?.user || null;
+  await syncAssessmentToSupabase();
+  createSecureCheckout();
+}
+
+async function signOutCustomer(){
+  const client = getSupabaseClient();
+  if(client){ await client.auth.signOut(); }
+  currentAuthUser = null;
+  paidAccessGranted = false;
+  try{ localStorage.removeItem(PAID_ACCESS_CACHE_KEY); }catch(e){}
+  showScreen("screen-welcome");
+}
+
+async function resetCustomerPassword(){
+  const client = getSupabaseClient();
+  const statusEl = document.getElementById("authForgotStatus");
+  if(!client){ statusEl.textContent = "Password reset isn't connected yet — see SETUP.md."; statusEl.style.display = "block"; return; }
+  const email = document.getElementById("fpEmail").value.trim();
+  if(!email) return;
+  const { error } = await client.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  statusEl.style.display = "block";
+  statusEl.textContent = error ? error.message : "If an account exists for that email, a reset link is on its way.";
+}
+
+async function syncAssessmentToSupabase(){
+  const client = getSupabaseClient();
+  if(!client || !currentAuthUser) return;
+  const res = loadAssessmentResults();
+  if(!res) return;
+  try{
+    await client.from("assessment_results").insert({
+      user_id: currentAuthUser.id,
+      assessment_version: "v1",
+      blueprint_season: res.seasonKey,
+      readiness_score: res.overallPct,
+      primary_blocker: res.blockerKey,
+      top_priorities: res.growthPriorities,
+      core_strengths: res.strengths,
+      dimension_scores: res.dimScores,
+      reflection_answers: res.reflections,
+      completed_at: res.savedAt || new Date().toISOString()
+    });
+  }catch(e){ console.warn("Could not sync assessment to Supabase:", e); }
+}
+
+/* ---- Account screen ---- */
+async function loadCustomerProfile(){
+  const client = getSupabaseClient();
+  const wrap = document.getElementById("accountDetailsWrap");
+  if(!client || !currentAuthUser){
+    wrap.innerHTML = `<p>You're not signed in. <button class="btn btn-outline btn-small" onclick="showScreen('screen-auth'); showAuthMode('signin')">Sign In</button></p>`;
+    return;
+  }
+  const { data: profile } = await client.from("profiles").select("*").eq("id", currentAuthUser.id).maybeSingle();
+  const { data: purchases } = await client.from("purchases").select("purchased_at, amount_paid, currency, payment_status").eq("user_id", currentAuthUser.id);
+
+  let html = `<div class="account-row"><span>Name</span><span>${(profile && profile.first_name) || "—"}</span></div>
+    <div class="account-row"><span>Email</span><span>${currentAuthUser.email}</span></div>
+    <div class="account-row"><span>Access status</span><span>${paidAccessGranted ? "Lifetime access active" : "No active access"}</span></div>`;
+  html += `<h4 style="color:var(--royal); margin-top:18px;">Purchase History</h4>`;
+  if(purchases && purchases.length){
+    purchases.forEach(p => {
+      html += `<div class="account-row"><span>${new Date(p.purchased_at).toLocaleDateString()}</span><span>${(p.amount_paid/100).toFixed(2)} ${(p.currency||"usd").toUpperCase()} — ${p.payment_status}</span></div>`;
+    });
+  } else {
+    html += `<p style="font-size:0.88rem; color:#888;">No purchases on file yet.</p>`;
+  }
+  wrap.innerHTML = html;
+}
+
+async function exportCustomerData(){
+  const client = getSupabaseClient();
+  if(!client || !currentAuthUser){ alert("Sign in to export your data."); return; }
+  const [{ data: assessment }, { data: purchases }, { data: journeyRows }] = await Promise.all([
+    client.from("assessment_results").select("*").eq("user_id", currentAuthUser.id),
+    client.from("purchases").select("purchased_at, amount_paid, currency, payment_status").eq("user_id", currentAuthUser.id),
+    client.from("journey_progress").select("*").eq("user_id", currentAuthUser.id)
+  ]);
+  const payload = { profile_email: currentAuthUser.email, assessment, purchases, journey: journeyRows, exportedAt: new Date().toISOString() };
+  downloadTextFile("blueprint-code-my-data-export.json", JSON.stringify(payload, null, 2));
+}
+
+async function requestAccountDeletion(){
+  if(!confirm("This will send a request to delete your account and personal data. Continue?")) return;
+  // Account deletion requires the service-role key and therefore
+  // must be handled by a secure backend endpoint, not the browser.
+  // Wire this to a dedicated Edge Function (or your support inbox)
+  // that verifies the request and deletes the auth.users row plus
+  // associated data.
+  alert(`Your deletion request has been noted. Please also email ${SUPPORT_EMAIL} to confirm — account deletion is completed by our support team, not automatically from the browser.`);
+}
+
+/* ============================================================
+   PRODUCTION INTEGRATION NOTES (for a future developer)
+   - Payment provider: replace PAYMENT_CHECKOUT_URL with a real
+     checkout link, and verify purchases server-side via the
+     provider's webhook/API before calling unlockPaidJourney().
+   - Authentication: add real user accounts so journey/journal/
+     check-in data is tied to a person, not just a browser.
+   - Database: replace localStorage with an authenticated,
+     encrypted database for production-grade persistence and
+     cross-device access.
+   - Email service: purchase confirmation, welcome, day 1
+     reminder, weekly encouragement, incomplete-module reminder,
+     30/60/90-day check-ins, and coaching invitation emails all
+     need a backend email service — do not send email directly
+     from front-end JavaScript.
+   - Analytics & customer support: connect as needed once a
+     backend exists.
+============================================================ */
+</script>
+</body>
+</html>
