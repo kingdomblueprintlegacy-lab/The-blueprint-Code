@@ -1,4 +1,4 @@
-     name: Deploy Supabase (schema + Edge Functions)
+name: Deploy Supabase (schema + Edge Functions)
 
 # Runs automatically whenever you push changes under supabase/,
 # and can also be triggered manually from the GitHub Actions tab
